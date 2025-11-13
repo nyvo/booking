@@ -1,0 +1,90 @@
+# Project Summary - Yoga Booking App
+
+## Recent Session (2025-11-09)
+
+### Work Completed
+Updated availability display across all student-facing pages to use clearer Norwegian language.
+
+#### Availability Language Update
+**Problem:** "3 av 8" was ambiguous - unclear if 3 or 5 spots were available
+**Solution:** Changed language to be explicit: "3 ledige av 8 plasser" (3 available of 8 spots)
+
+**Files Updated:**
+1. `/src/pages/student/Browse.tsx` - Preview cards
+   - Changed to: `{availableSpots} ledige plasser` with number in font-medium, text muted
+   
+2. `/src/pages/student/ClassDetail.tsx` - Detail page
+   - Label: "Tilgjengelighet" 
+   - Value: `{availableSpots} ledige av {capacity} plasser` (font-medium text-foreground)
+   
+3. `/src/pages/student/CourseDetail.tsx` - Detail page
+   - Label: "Tilgjengelighet"
+   - Value: `{availableSpots} ledige av {capacity} plasser` (font-medium text-foreground)
+   
+4. `/src/pages/student/EventDetail.tsx` - Detail page
+   - Label: "Tilgjengelighet"
+   - Value: `{availableSpots} ledige av {capacity} plasser` (font-medium text-foreground)
+
+**Design Decisions:**
+- Browse cards: Number emphasized, text muted ("3 ledige plasser")
+- Detail pages: Entire line in uniform font-medium to match other categories (Date, Time, Location)
+- Word "ledige" (vacant/available) makes it unambiguous what the number represents
+- Kept clean, consistent styling - no oversized/bold numbers
+
+## Previous Work (Context)
+
+### Terminology Updates
+- "Timer" → "Enkeltkurs" (single classes)
+- "Kurs" → "Kursrekker" (course series)
+- "Events" → "Arrangementer" (arrangements/events)
+- "Studenter" → "Påmeldte/Påmeldinger" (enrolled students → registrations)
+- Updated breadcrumbs, buttons, page titles, and navigation throughout
+
+### Dashboard Improvements
+- Shows mixed class types (Enkeltkurs, Kursrekker, Arrangementer)
+- Maximum 5 items, sorted by date
+- Type badges for visual distinction
+- Fixed stat card to show combined total count
+
+### Browse Page Decluttering
+- Removed description, tags, and duration details from preview cards
+- Condensed date/time/location to single line with bullet separators
+- Kept availability (now with clear language)
+- Clean, scannable card design
+
+### Bug Fixes
+- Fixed Bookings page TypeError (PaginatedResponse structure)
+- Fixed dashboard count showing wrong total
+- Fixed filter spacing on Browse page
+
+## Current State
+All planned updates completed. App has clear Norwegian terminology, improved UX, and consistent design patterns.
+
+## Next Steps for Tomorrow
+
+### Potential Areas to Explore:
+1. **Testing & QA**
+   - Test all three class types (Enkeltkurs, Kursrekker, Arrangementer)
+   - Verify booking flows work correctly
+   - Check responsive design on mobile devices
+   - Test with different data states (full classes, empty states, etc.)
+
+2. **Additional Features** (if requested)
+   - Email notifications system
+   - Payment integration
+   - Calendar view for classes
+   - Teacher analytics/reporting
+   - Student profiles and history
+
+3. **Performance Optimization**
+   - Review API calls and caching strategies
+   - Optimize component re-renders
+   - Bundle size analysis
+
+4. **Polish & Refinement**
+   - Additional UI/UX improvements
+   - Accessibility enhancements
+   - Loading states and error handling
+   - Form validation improvements
+
+**Note:** Wait for user direction before starting new work. Current implementation is complete and functional.

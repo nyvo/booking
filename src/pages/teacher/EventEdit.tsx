@@ -1,0 +1,588 @@
+/**
+ * Class editing page for teachers
+ */
+
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
+import { CalendarIcon, Trash2 } from "lucide-react";
+
+import TeacherLayout from "@/components/layout/TeacherLayout";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useEvent, useEventMutations } from "@/hooks/useClasses";
+import { ROUTES } from "@/config/constants";
+
+import { Button } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// Form validation schema
+const eventFormSchema = z.object({
+  name: z
+    .string()
+    .min(3, "Navn må være minst 3 tegn")
+    .max(100, "Navn kan ikke være mer enn 100 tegn"),
+  description: z.string().optional(),
+  date: z.date({ required_error: "Dato er påkrevd" }),
+  startTime: z
+    .string()
+    .regex(
+      /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+      "Ugyldig tidsformat (bruk HH:MM)",
+    ),
+  duration: z
+    .number()
+    .min(15, "Varighet må være minst 15 minutter")
+    .max(300, "Varighet kan ikke overstige 300 minutter"),
+  capacity: z
+    .number()
+    .min(1, "Kapasitet må være minst 1")
+    .max(100, "Kapasitet kan ikke overstige 100"),
+  price: z.number().min(0, "Pris kan ikke være negativ"),
+  location: z.string().min(2, "Lokasjon må være minst 2 tegn"),
+  dropInAvailable: z.boolean().default(true),
+  tags: z.string().optional(),
+});
+
+type EventFormValues = z.infer<typeof eventFormSchema>;
+
+export default function EventEdit() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuthContext();
+
+  const {
+    data: eventData,
+    loading: loadingClass,
+    error: loadError,
+  } = useEvent(id);
+  const { update, remove, loading, error } = useEventMutations();
+
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      date: new Date(),
+      startTime: "10:00",
+      duration: 60,
+      capacity: 15,
+      price: 200,
+      location: "",
+      dropInAvailable: true,
+      tags: "",
+    },
+  });
+
+  // Populate form when class data loads
+  useEffect(() => {
+    if (eventData) {
+      form.reset({
+        name: eventData.name,
+        description: eventData.description || "",
+        date: new Date(eventData.date),
+        startTime: eventData.startTime,
+        duration: eventData.duration,
+        capacity: eventData.capacity,
+        price: eventData.price,
+        location: eventData.location,
+        dropInAvailable: eventData.dropInAvailable,
+        tags: eventData.tags?.join(", ") || "",
+      });
+    }
+  }, [eventData, form]);
+
+  const onSubmit = async (values: EventFormValues) => {
+    try {
+      setSubmitError(null);
+
+      if (!id) {
+        setSubmitError("Mangler time-ID");
+        return;
+      }
+
+      if (!user?.id) {
+        setSubmitError("Du må være innlogget for å redigere en time");
+        return;
+      }
+
+      // Parse tags
+      const tags = values.tags
+        ? values.tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter(Boolean)
+        : undefined;
+
+      await update(id, {
+        name: values.name,
+        description: values.description || undefined,
+        date: values.date,
+        startTime: values.startTime,
+        duration: values.duration,
+        capacity: values.capacity,
+        price: values.price,
+        location: values.location,
+        dropInAvailable: values.dropInAvailable,
+        tags,
+      });
+
+      // Navigate back to classes list on success
+      navigate(ROUTES.TEACHER.EVENTS);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Kunne ikke oppdatere time",
+      );
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+
+      if (!id) {
+        return;
+      }
+
+      await remove(id);
+
+      // Navigate back to classes list on success
+      navigate(ROUTES.TEACHER.EVENTS);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Kunne ikke slette time",
+      );
+      setShowDeleteDialog(false);
+      setIsDeleting(false);
+    }
+  };
+
+  // Loading state
+  if (loadingClass) {
+    return (
+      <TeacherLayout>
+        <div className="flex min-h-[400px] items-center justify-center">
+          <div className="text-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Laster time...</p>
+          </div>
+        </div>
+      </TeacherLayout>
+    );
+  }
+
+  // Error state
+  if (loadError || !eventData) {
+    return (
+      <TeacherLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-semibold text-foreground">
+              Feil ved lasting
+            </h1>
+          </div>
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+            <p className="font-medium">Kunne ikke laste time</p>
+            <p className="text-sm mt-1">
+              {loadError?.message || "Timen ble ikke funnet"}
+            </p>
+          </div>
+          <Button onClick={() => navigate(ROUTES.TEACHER.EVENTS)}>
+            Tilbake til timer
+          </Button>
+        </div>
+      </TeacherLayout>
+    );
+  }
+
+  return (
+    <TeacherLayout>
+      <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href={ROUTES.TEACHER.DASHBOARD}>
+                Hjem
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={ROUTES.TEACHER.EVENTS}>
+                Arrangementer
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Rediger</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {/* Page Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold text-foreground">
+              Rediger arrangement
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Oppdater informasjon om arrangementet
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteDialog(true)}
+            disabled={loading || isDeleting}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Slett time
+          </Button>
+        </div>
+
+        {/* Error Display */}
+        {(submitError || error) && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+            <p className="font-medium">Feil:</p>
+            <p className="text-sm mt-1">{submitError || error?.message}</p>
+          </div>
+        )}
+
+        {/* Form */}
+        <div className="rounded-lg border border-border bg-white p-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {/* Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Navn *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="F.eks. Morgen Hatha Yoga"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Navnet på timen som vises til studentene
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Beskrivelse</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Beskriv timen..."
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      En detaljert beskrivelse av hva timen innebærer
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Date and Time Row */}
+              <div className="grid gap-4 md:grid-cols-2">
+                {/* Date */}
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Dato *</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-left font-normal"
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? (
+                                format(field.value, "dd.MM.yyyy")
+                              ) : (
+                                <span>Velg dato</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date < new Date(new Date().setHours(0, 0, 0, 0))
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Start Time */}
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Starttid *</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Duration, Capacity, Price Row */}
+              <div className="grid gap-4 md:grid-cols-3">
+                {/* Duration */}
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Varighet (min) *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Capacity */}
+                <FormField
+                  control={form.control}
+                  name="capacity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kapasitet *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Price */}
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pris (NOK) *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Location */}
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Lokasjon *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="F.eks. Yoga Studio Oslo" {...field} />
+                    </FormControl>
+                    <FormDescription>Hvor timen finner sted</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Tags */}
+              <FormField
+                control={form.control}
+                name="tags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="F.eks. Hatha, Nybegynner, Meditasjon"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Kommaseparerte tags (valgfritt)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Drop-in Available */}
+              <FormField
+                control={form.control}
+                name="dropInAvailable"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Drop-in tilgjengelig</FormLabel>
+                      <FormDescription>
+                        Tillat studenter å melde seg på uten fast plass
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Booking Info */}
+              {eventData.bookedCount > 0 && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>Info:</strong> {eventData.bookedCount}{" "}
+                    {eventData.bookedCount === 1 ? "påmeldt" : "påmeldte"} på
+                    dette arrangementet. Endringer i pris, dato eller tid blir
+                    automatisk sendt på e-post til alle påmeldte.
+                  </p>
+                </div>
+              )}
+
+              {/* Form Actions */}
+              <div className="flex gap-4">
+                <Button type="submit" disabled={loading || isDeleting}>
+                  {loading ? "Lagrer..." : "Lagre endringer"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate(ROUTES.TEACHER.EVENTS)}
+                  disabled={loading || isDeleting}
+                >
+                  Avbryt
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Bekreft sletting</DialogTitle>
+              <DialogDescription>
+                Er du sikker på at du vil slette dette arrangementet? Dette kan
+                ikke angres.
+                {eventData.bookedCount > 0 && (
+                  <span className="block mt-2 font-medium text-red-600">
+                    Advarsel: {eventData.bookedCount} påmeldte på dette
+                    arrangementet!
+                  </span>
+                )}
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={isDeleting}
+              >
+                Avbryt
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Sletter..." : "Ja, slett time"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </TeacherLayout>
+  );
+}

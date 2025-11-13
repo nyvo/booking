@@ -1,0 +1,155 @@
+{
+  "common": {
+    "loading": "Laster...",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "create": "Opprett",
+    "search": "Søk",
+    "filter": "Filtrer",
+    "yes": "Ja",
+    "no": "Nei",
+    "confirm": "Bekreft",
+    "back": "Tilbake",
+    "next": "Neste",
+    "submit": "Send inn",
+    "close": "Lukk"
+  },
+  "auth": {
+    "login": "Logg inn",
+    "logout": "Logg ut",
+    "email": "E-post",
+    "password": "Passord",
+    "forgotPassword": "Glemt passord?",
+    "register": "Registrer",
+    "teacher": "Lærer",
+    "student": "Student"
+  },
+  "nav": {
+    "dashboard": "Dashbord",
+    "classes": "Enkeltkurs",
+    "courses": "Kursrekker",
+    "events": "Arrangement",
+    "students": "Påmeldinger",
+    "payments": "Betalinger",
+    "profile": "Profil",
+    "settings": "Innstillinger"
+  },
+  "teacher": {
+    "welcome": "Velkommen",
+    "dashboard": {
+      "title": "Dashbord",
+      "upcomingClasses": "Kommende timer",
+      "recentBookings": "Nylige bestillinger",
+      "revenue": "Inntekter",
+      "totalStudents": "Totalt antall studenter"
+    },
+    "class": {
+      "title": "Enkeltkurs",
+      "createClass": "Opprett enkeltkurs",
+      "editClass": "Rediger enkeltkurs",
+      "singleClass": "Enkeltkurs",
+      "name": "Navn",
+      "description": "Beskrivelse",
+      "date": "Dato",
+      "time": "Tid",
+      "duration": "Varighet",
+      "capacity": "Kapasitet",
+      "price": "Pris",
+      "dropInAvailable": "Drop-in tilgjengelig",
+      "location": "Sted"
+    },
+    "course": {
+      "title": "Kursrekker",
+      "createCourse": "Opprett kursrekke",
+      "editCourse": "Rediger kursrekke",
+      "courseSeries": "Kursrekke",
+      "numberOfWeeks": "Antall uker",
+      "startDate": "Startdato",
+      "recurringSchedule": "Gjentagende tidspunkt",
+      "enrolledStudents": "Påmeldte studenter"
+    },
+    "event": {
+      "title": "Arrangement",
+      "createEvent": "Opprett arrangement",
+      "editEvent": "Rediger arrangement",
+      "specialEvent": "Arrangement",
+      "eventType": "Arrangementtype"
+    },
+    "student": {
+      "title": "Påmeldinger",
+      "viewStudents": "Se påmeldinger",
+      "studentName": "Studentnavn",
+      "bookingHistory": "Bestillingshistorikk",
+      "attendance": "Oppmøte"
+    },
+    "payment": {
+      "title": "Betalinger",
+      "paymentHistory": "Betalingshistorikk",
+      "pending": "Ventende",
+      "paid": "Betalt",
+      "overdue": "Forfalt",
+      "amount": "Beløp",
+      "status": "Status",
+      "revenueReport": "Inntektsrapport"
+    }
+  },
+  "student": {
+    "browse": {
+      "title": "Utforsk",
+      "availableClasses": "Tilgjengelige enkeltkurs",
+      "availableCourses": "Tilgjengelige kursrekker",
+      "availableEvents": "Tilgjengelige arrangement",
+      "viewCalendar": "Se kalender",
+      "filterByDate": "Filtrer etter dato",
+      "filterByTeacher": "Filtrer etter lærer",
+      "filterByType": "Filtrer etter type",
+      "dropInOnly": "Kun drop-in"
+    },
+    "booking": {
+      "title": "Bestilling",
+      "bookNow": "Book nå",
+      "checkAvailability": "Sjekk tilgjengelighet",
+      "confirmBooking": "Bekreft bestilling",
+      "bookingConfirmed": "Bestilling bekreftet",
+      "cancelBooking": "Avbryt bestilling",
+      "myBookings": "Mine bestillinger",
+      "upcomingBookings": "Kommende bestillinger",
+      "pastBookings": "Tidligere bestillinger",
+      "spotsAvailable": "ledige plasser",
+      "fullyBooked": "Fullbooket"
+    },
+    "profile": {
+      "title": "Profil",
+      "myProfile": "Min profil",
+      "editProfile": "Rediger profil",
+      "name": "Navn",
+      "phone": "Telefon",
+      "preferences": "Preferanser"
+    }
+  },
+  "errors": {
+    "required": "Dette feltet er påkrevd",
+    "invalidEmail": "Ugyldig e-postadresse",
+    "invalidPhone": "Ugyldig telefonnummer",
+    "minLength": "Må være minst {{count}} tegn",
+    "maxLength": "Kan ikke være mer enn {{count}} tegn",
+    "generic": "Noe gikk galt. Vennligst prøv igjen.",
+    "notFound": "Ikke funnet",
+    "unauthorized": "Ikke autorisert"
+  },
+  "validation": {
+    "pleaseEnter": "Vennligst oppgi {{field}}",
+    "pleaseSelect": "Vennligst velg {{field}}",
+    "invalidFormat": "Ugyldig format for {{field}}"
+  },
+  "dates": {
+    "today": "I dag",
+    "tomorrow": "I morgen",
+    "yesterday": "I går",
+    "week": "Uke",
+    "month": "Måned",
+    "year": "År"
+  }
+}
