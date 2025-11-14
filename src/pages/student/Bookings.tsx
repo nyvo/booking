@@ -9,7 +9,7 @@ import { Calendar, Clock, MapPin, DollarSign, AlertCircle } from "lucide-react";
 import StudentLayout from "@/components/layout/StudentLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useStudentBookings } from "@/hooks/useBookings";
-import { useClasses, useCourses, useEvents } from "@/hooks/useClasses";
+import { useCourses, useEvents } from "@/hooks/useClasses";
 import { formatDate, formatCurrency } from "@/utils/date";
 import { ROUTES } from "@/config/constants";
 import { Badge } from "@/components/ui/badge";
@@ -29,14 +29,12 @@ export default function Bookings() {
   const { data: bookings, loading: loadingBookings } = useStudentBookings(
     user?.id,
   );
-  const { data: classes } = useClasses();
   const { data: courses } = useCourses();
   const { data: events } = useEvents();
 
   // Enrich bookings with item details and payment info
   const enrichedBookings = useMemo(() => {
-    if (!bookings || !classes?.data || !courses?.data || !events?.data)
-      return [];
+    if (!bookings || !courses?.data || !events?.data) return [];
 
     return bookings
       .map((booking) => {
@@ -45,16 +43,9 @@ export default function Bookings() {
         let detailRoute = "";
 
         // Match by itemId and itemType
-        if (booking.itemType === "single") {
-          itemDetails = classes.data.find((c) => c.id === booking.itemId);
-          itemTypeName = "Enkeltkurs";
-          detailRoute = ROUTES.STUDENT.CLASS_DETAIL.replace(
-            ":id",
-            booking.itemId,
-          );
-        } else if (booking.itemType === "course") {
+        if (booking.itemType === "course") {
           itemDetails = courses.data.find((c) => c.id === booking.itemId);
-          itemTypeName = "Kursrekke";
+          itemTypeName = "Kurs";
           detailRoute = ROUTES.STUDENT.COURSE_DETAIL.replace(
             ":id",
             booking.itemId,
@@ -117,7 +108,7 @@ export default function Bookings() {
     return (
       <div
         key={booking.id}
-        className="rounded-lg border border-border bg-white p-6 hover:shadow-md transition-shadow cursor-pointer"
+        className="rounded-2xl border border-border bg-white p-6 hover:shadow-sm transition-shadow cursor-pointer"
         onClick={() => navigate(booking.detailRoute)}
       >
         {/* Header */}
@@ -134,10 +125,10 @@ export default function Bookings() {
               <p
                 className={`text-xs ${
                   booking.payment.status === "paid"
-                    ? "text-green-600"
+                    ? "text-primary"
                     : booking.payment.status === "pending"
-                      ? "text-yellow-600"
-                      : "text-red-600"
+                      ? "text-accent"
+                      : "text-destructive"
                 }`}
               >
                 {booking.payment.status === "paid" && "Betalt"}
@@ -221,7 +212,7 @@ export default function Bookings() {
               </p>
               <button
                 onClick={() => navigate(ROUTES.STUDENT.BROWSE)}
-                className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 transition-colors cursor-pointer"
               >
                 Utforsk
               </button>

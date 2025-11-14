@@ -12,6 +12,7 @@ import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTeacherMutations } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -97,32 +98,36 @@ export default function TeacherProfile() {
     <TeacherLayout>
       <div className="space-y-6">
         {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground">Min profil</h1>
-          <p className="mt-2 text-muted-foreground">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-semibold text-foreground">Min profil</h1>
+          <p className="text-muted-foreground">
             Administrer profilinformasjonen din
           </p>
         </div>
 
         {/* Success Message */}
         {submitSuccess && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">
-            <p className="font-medium">Profilen ble oppdatert!</p>
-          </div>
+          <Card className="border-primary/20 bg-primary/5 p-6">
+            <p className="font-medium text-primary">Profilen ble oppdatert!</p>
+          </Card>
         )}
 
         {/* Error Display */}
         {(submitError || error) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Feil ved oppdatering:</p>
-            <p className="text-sm mt-1">{submitError || error?.message}</p>
-          </div>
+          <Card className="border-destructive/20 bg-destructive/5 p-6">
+            <p className="font-medium text-destructive">
+              Feil ved oppdatering:
+            </p>
+            <p className="text-sm mt-2 text-destructive/80">
+              {submitError || error?.message}
+            </p>
+          </Card>
         )}
 
         {/* Profile Form */}
-        <div className="rounded-lg border border-border bg-white p-6">
+        <Card className="p-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               {/* Name */}
               <FormField
                 control={form.control}
@@ -272,7 +277,7 @@ export default function TeacherProfile() {
               </div>
             </form>
           </Form>
-        </div>
+        </Card>
       </div>
     </TeacherLayout>
   );

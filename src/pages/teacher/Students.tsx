@@ -11,9 +11,10 @@ import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useStudents } from "@/hooks/useAuth";
 import { useBookings } from "@/hooks/useBookings";
-import { useClasses, useCourses, useEvents } from "@/hooks/useClasses";
+import { useCourses, useEvents } from "@/hooks/useClasses";
 import { ROUTES } from "@/config/constants";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function Students() {
   const navigate = useNavigate();
@@ -25,7 +26,6 @@ export default function Students() {
     error: studentsError,
   } = useStudents();
   const { data: bookingsResponse, loading: loadingBookings } = useBookings();
-  const { data: classes, loading: loadingClasses } = useClasses();
   const { data: courses, loading: loadingCourses } = useCourses();
   const { data: events, loading: loadingEvents } = useEvents();
 
@@ -33,19 +33,11 @@ export default function Students() {
 
   // Filter students who have bookings with this teacher
   const studentsWithBookings = useMemo(() => {
-    if (
-      !allStudents ||
-      !allBookings.length ||
-      !classes ||
-      !courses ||
-      !events ||
-      !user?.id
-    )
+    if (!allStudents || !allBookings.length || !courses || !events || !user?.id)
       return [];
 
     // Get all item IDs that belong to this teacher
     const teacherItemIds = new Set([
-      ...classes.filter((c) => c.teacherId === user.id).map((c) => c.id),
       ...courses.filter((c) => c.teacherId === user.id).map((c) => c.id),
       ...events.filter((e) => e.teacherId === user.id).map((e) => e.id),
     ]);
@@ -79,72 +71,61 @@ export default function Students() {
         };
       })
       .sort((a, b) => b.bookingCount - a.bookingCount); // Sort by most bookings
-  }, [allStudents, allBookings, classes, courses, events, user?.id]);
+  }, [allStudents, allBookings, courses, events, user?.id]);
 
   const loading =
-    loadingStudents ||
-    loadingBookings ||
-    loadingClasses ||
-    loadingCourses ||
-    loadingEvents;
+    loadingStudents || loadingBookings || loadingCourses || loadingEvents;
 
   return (
     <TeacherLayout>
       <div className="space-y-6">
         {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-semibold text-foreground">
             Påmeldinger
           </h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground">
             Oversikt over alle påmeldte som har booket timer hos deg
           </p>
         </div>
 
         {/* Error Display */}
         {studentsError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Feil ved lasting:</p>
-            <p className="text-sm mt-1">{studentsError.message}</p>
-          </div>
+          <Card className="border-destructive/20 bg-destructive/5 p-6">
+            <p className="font-medium text-destructive">Feil ved lasting:</p>
+            <p className="text-sm mt-2 text-destructive/80">
+              {studentsError.message}
+            </p>
+          </Card>
         )}
 
         {/* Loading State */}
         {loading && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="rounded-lg border border-border bg-white p-6 animate-pulse"
-              >
-                <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                </div>
-              </div>
+              <Card key={i} className="h-48 animate-pulse p-6" />
             ))}
           </div>
         )}
 
         {/* Students Grid */}
         {!loading && studentsWithBookings.length === 0 && (
-          <div className="rounded-lg border border-border bg-white p-12 text-center">
+          <Card className="p-12 text-center">
             <p className="text-lg text-muted-foreground">
               Ingen påmeldinger ennå
             </p>
             <p className="text-sm text-muted-foreground mt-2">
               Når noen booker timer vil de vises her
             </p>
-          </div>
+          </Card>
         )}
 
         {!loading && studentsWithBookings.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {studentsWithBookings.map((student) => (
-              <div
+              <Card
                 key={student.id}
-                className="rounded-lg border border-border bg-white p-6 hover:shadow-md transition-shadow cursor-pointer"
+                className="p-6 hover:shadow-sm transition-all cursor-pointer"
                 onClick={() =>
                   navigate(
                     ROUTES.TEACHER.STUDENTS_DETAIL.replace(":id", student.id),
@@ -152,7 +133,7 @@ export default function Students() {
                 }
               >
                 {/* Student Name */}
-                <h3 className="text-lg font-semibold text-foreground mb-3">
+                <h3 className="text-lg font-semibold text-foreground mb-4">
                   {student.name}
                 </h3>
 
@@ -173,34 +154,34 @@ export default function Students() {
                 </div>
 
                 {/* Booking Stats */}
-                <div className="flex items-center justify-between pt-4 border-t border-border">
+                <div className="flex items-center justify-between pt-4 border-t border-border/60">
                   <div className="flex items-center text-sm text-muted-foreground">
-                    <Calendar className="h-4 w-4 mr-1.5" />
+                    <Calendar className="h-4 w-4 mr-2" />
                     <span>{student.activeBookings} aktive</span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
-                    <CreditCard className="h-4 w-4 mr-1.5" />
+                    <CreditCard className="h-4 w-4 mr-2" />
                     <span>{student.bookingCount} totalt</span>
                   </div>
                 </div>
 
                 {/* Medical Notes Indicator */}
                 {student.medicalNotes && (
-                  <div className="mt-3 pt-3 border-t border-border">
+                  <div className="mt-4 pt-4 border-t border-border/60">
                     <p className="text-xs text-orange-600 font-medium">
                       ⚕️ Har medisinsk informasjon
                     </p>
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         )}
 
         {/* Summary Stats */}
         {!loading && studentsWithBookings.length > 0 && (
-          <div className="rounded-lg border border-border bg-blue-50 p-4">
-            <p className="text-sm text-blue-800">
+          <Card className="border-primary/20 bg-primary/5 p-6">
+            <p className="text-sm text-foreground">
               <strong>{studentsWithBookings.length}</strong>{" "}
               {studentsWithBookings.length === 1 ? "påmeldt" : "påmeldte"}{" "}
               totalt
@@ -213,7 +194,7 @@ export default function Students() {
               </strong>{" "}
               aktive bookinger
             </p>
-          </div>
+          </Card>
         )}
       </div>
     </TeacherLayout>

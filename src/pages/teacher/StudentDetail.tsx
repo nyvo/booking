@@ -19,9 +19,11 @@ import {
 import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useStudent } from "@/hooks/useAuth";
 import { useStudentBookings } from "@/hooks/useBookings";
-import { useClasses, useCourses, useEvents } from "@/hooks/useClasses";
+import { useCourses, useEvents } from "@/hooks/useClasses";
 import { ROUTES } from "@/config/constants";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,10 +44,10 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
 };
 
 const STATUS_COLORS: Record<BookingStatus, string> = {
-  confirmed: "bg-green-100 text-green-800",
-  pending: "bg-yellow-100 text-yellow-800",
-  cancelled: "bg-gray-100 text-gray-800",
-  completed: "bg-blue-100 text-blue-800",
+  confirmed: "bg-primary/10 text-primary",
+  pending: "bg-accent/10 text-accent",
+  cancelled: "bg-muted/10 text-muted-foreground",
+  completed: "bg-primary/5 text-primary/80",
 };
 
 export default function StudentDetail() {
@@ -129,12 +131,12 @@ export default function StudentDetail() {
   if (loading) {
     return (
       <TeacherLayout>
-        <div className="flex min-h-[400px] items-center justify-center">
+        <Card className="flex min-h-[400px] items-center justify-center p-12">
           <div className="text-center">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
             <p className="mt-4 text-muted-foreground">Laster student...</p>
           </div>
-        </div>
+        </Card>
       </TeacherLayout>
     );
   }
@@ -144,17 +146,19 @@ export default function StudentDetail() {
     return (
       <TeacherLayout>
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-semibold text-foreground">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-semibold text-foreground">
               Feil ved lasting
             </h1>
           </div>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Kunne ikke laste student</p>
-            <p className="text-sm mt-1">
+          <Card className="border-destructive/20 bg-destructive/5 rounded-2xl p-6">
+            <p className="font-medium text-destructive/80">
+              Kunne ikke laste student
+            </p>
+            <p className="text-sm mt-2 text-destructive/70">
               {studentError?.message || "Studenten ble ikke funnet"}
             </p>
-          </div>
+          </Card>
           <Button onClick={() => navigate(ROUTES.TEACHER.STUDENTS)}>
             Tilbake til påmeldinger
           </Button>
@@ -197,8 +201,8 @@ export default function StudentDetail() {
         </Button>
 
         {/* Student Header */}
-        <div className="rounded-lg border border-border bg-white p-6">
-          <h1 className="text-3xl font-semibold text-foreground mb-4">
+        <Card className="p-8">
+          <h1 className="text-4xl font-semibold text-foreground mb-6">
             {student.name}
           </h1>
 
@@ -247,54 +251,70 @@ export default function StudentDetail() {
 
           {/* Medical Notes */}
           {student.medicalNotes && (
-            <div className="mt-6 pt-6 border-t border-border">
-              <div className="flex items-start gap-3 p-4 rounded-lg bg-orange-50 border border-orange-200">
-                <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+            <div className="mt-6 pt-6 border-t border-border/60">
+              <div className="flex items-start gap-3 p-4 rounded-2xl bg-accent/5 border border-accent/20">
+                <AlertCircle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
                 <div>
-                  <h3 className="font-medium text-orange-900 mb-1">
+                  <h3 className="font-medium text-foreground mb-2">
                     Medisinsk informasjon
                   </h3>
-                  <p className="text-sm text-orange-800">
+                  <p className="text-sm text-accent/80">
                     {student.medicalNotes}
                   </p>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Payment Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-lg border border-border bg-white p-4">
-            <p className="text-sm text-muted-foreground">Totalt betalt</p>
-            <p className="text-2xl font-semibold text-foreground mt-1">
-              {formatCurrency(paymentStats.paid)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border bg-white p-4">
-            <p className="text-sm text-muted-foreground">Venter betaling</p>
-            <p className="text-2xl font-semibold text-yellow-600 mt-1">
-              {formatCurrency(paymentStats.pending)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border bg-white p-4">
-            <p className="text-sm text-muted-foreground">Refundert</p>
-            <p className="text-2xl font-semibold text-muted-foreground mt-1">
-              {formatCurrency(paymentStats.refunded)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border bg-white p-4">
-            <p className="text-sm text-muted-foreground">Antall bookinger</p>
-            <p className="text-2xl font-semibold text-foreground mt-1">
-              {bookings?.length || 0}
-            </p>
-          </div>
+        <div className="grid gap-6 md:grid-cols-4">
+          <Card className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Totalt betalt
+              </p>
+              <p className="text-3xl font-bold text-foreground">
+                {formatCurrency(paymentStats.paid)}
+              </p>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Venter betaling
+              </p>
+              <p className="text-3xl font-bold text-accent">
+                {formatCurrency(paymentStats.pending)}
+              </p>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Refundert
+              </p>
+              <p className="text-3xl font-bold text-muted-foreground">
+                {formatCurrency(paymentStats.refunded)}
+              </p>
+            </div>
+          </Card>
+          <Card className="p-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">
+                Antall bookinger
+              </p>
+              <p className="text-3xl font-bold text-foreground">
+                {bookings?.length || 0}
+              </p>
+            </div>
+          </Card>
         </div>
 
         {/* Bookings List */}
-        <div className="rounded-lg border border-border bg-white">
-          <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground">
+        <Card className="p-0 gap-0 overflow-hidden">
+          <div className="px-8 py-6 border-b border-border/60">
+            <h2 className="text-2xl font-semibold text-foreground">
               Bookinghistorikk
             </h2>
           </div>
@@ -304,29 +324,41 @@ export default function StudentDetail() {
               <p className="text-muted-foreground">Ingen bookinger funnet</p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-border/60">
               {enrichedBookings.map((booking) => (
-                <div key={booking.id} className="p-6">
-                  <div className="flex items-start justify-between mb-3">
+                <div key={booking.id} className="px-8 py-6">
+                  <div className="flex items-start justify-between mb-4">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-lg font-semibold text-foreground">
                           {booking.itemDetails?.name || "Ukjent"}
                         </h3>
-                        <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                        <Badge variant="secondary" className="text-xs">
                           {booking.itemTypeName}
-                        </span>
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
                         Booket {formatDate(new Date(booking.bookingDate))}
                       </p>
                     </div>
                     <div className="text-right">
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${STATUS_COLORS[booking.status]}`}
+                      <Badge
+                        variant={
+                          booking.status === "confirmed" ||
+                          booking.status === "completed"
+                            ? "default"
+                            : "secondary"
+                        }
+                        className={`${
+                          booking.status === "cancelled"
+                            ? "bg-muted text-muted-foreground"
+                            : booking.status === "pending"
+                              ? "bg-accent/10 text-accent border-accent/20"
+                              : ""
+                        }`}
                       >
                         {STATUS_LABELS[booking.status]}
-                      </span>
+                      </Badge>
                     </div>
                   </div>
 
@@ -348,7 +380,7 @@ export default function StudentDetail() {
                   )}
 
                   {booking.payment && (
-                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-border/60">
                       <div className="flex items-center gap-4 text-sm">
                         <div>
                           <span className="text-muted-foreground">
@@ -357,12 +389,12 @@ export default function StudentDetail() {
                           <span
                             className={
                               booking.payment.status === "paid"
-                                ? "text-green-600 font-medium"
+                                ? "text-primary font-medium"
                                 : booking.payment.status === "pending"
-                                  ? "text-yellow-600 font-medium"
+                                  ? "text-accent font-medium"
                                   : booking.payment.status === "refunded"
-                                    ? "text-gray-600 font-medium"
-                                    : "text-red-600 font-medium"
+                                    ? "text-muted-foreground font-medium"
+                                    : "text-destructive font-medium"
                             }
                           >
                             {booking.payment.status === "paid" && "Betalt"}
@@ -378,7 +410,7 @@ export default function StudentDetail() {
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center text-lg font-semibold text-foreground">
+                      <div className="flex items-center text-xl font-bold text-foreground">
                         {formatCurrency(booking.payment.amount)}
                       </div>
                     </div>
@@ -387,7 +419,7 @@ export default function StudentDetail() {
               ))}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </TeacherLayout>
   );

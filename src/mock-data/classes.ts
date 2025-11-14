@@ -1,111 +1,12 @@
 /**
- * Mock data for classes, courses, and events
+ * Mock data for courses and events
  */
 
-import type { Class, Course, Event, CourseSession } from "@/types";
+import type { Course, Event, CourseSession } from "@/types";
 import { generateSequentialId } from "@/utils/id";
 import { addDays, addWeeks } from "date-fns";
 
 const today = new Date();
-
-// Mock single classes
-export const mockClasses: Class[] = [
-  {
-    id: generateSequentialId("class", 1),
-    teacherId: "teacher-0001",
-    name: "Morgen Hatha Yoga",
-    description:
-      "Start dagen med en rolig og balansert Hatha yoga-økt. Fokus på grunnleggende stillinger og pusteøvelser.",
-    type: "single",
-    date: addDays(today, 1),
-    startTime: "07:00",
-    duration: 60,
-    capacity: 15,
-    price: 250,
-    location: "Studio A",
-    dropInAvailable: true,
-    bookedCount: 8,
-    tags: ["Hatha", "Morgen", "Nybegynner"],
-    createdAt: new Date("2024-10-01"),
-    updatedAt: new Date("2024-11-01"),
-  },
-  {
-    id: generateSequentialId("class", 2),
-    teacherId: "teacher-0003",
-    name: "Power Yoga",
-    description:
-      "Intensiv og dynamisk yoga-økt for deg som vil utfordre deg selv. Bygger styrke og utholdenhet.",
-    type: "single",
-    date: addDays(today, 1),
-    startTime: "18:00",
-    duration: 75,
-    capacity: 12,
-    price: 300,
-    location: "Studio B",
-    dropInAvailable: true,
-    bookedCount: 12,
-    tags: ["Power Yoga", "Avansert", "Kveld"],
-    createdAt: new Date("2024-10-05"),
-    updatedAt: new Date("2024-11-02"),
-  },
-  {
-    id: generateSequentialId("class", 3),
-    teacherId: "teacher-0002",
-    name: "Yin Yoga & Meditasjon",
-    description:
-      "Dyp avslapning med lange, passive stillinger. Perfekt for å slippe spenninger i kropp og sinn.",
-    type: "single",
-    date: addDays(today, 2),
-    startTime: "19:30",
-    duration: 90,
-    capacity: 15,
-    price: 280,
-    location: "Studio A",
-    dropInAvailable: true,
-    bookedCount: 5,
-    tags: ["Yin Yoga", "Meditasjon", "Avslapning"],
-    createdAt: new Date("2024-10-08"),
-    updatedAt: new Date("2024-11-03"),
-  },
-  {
-    id: generateSequentialId("class", 4),
-    teacherId: "teacher-0004",
-    name: "Senioryoga",
-    description:
-      "Tilpasset yoga for seniorer med fokus på mobilitet, balanse og styrke. Alle nivåer velkomne.",
-    type: "single",
-    date: addDays(today, 3),
-    startTime: "10:00",
-    duration: 60,
-    capacity: 10,
-    price: 200,
-    location: "Studio C",
-    dropInAvailable: true,
-    bookedCount: 7,
-    tags: ["Senioryoga", "Nybegynner", "Formiddag"],
-    createdAt: new Date("2024-10-10"),
-    updatedAt: new Date("2024-11-04"),
-  },
-  {
-    id: generateSequentialId("class", 5),
-    teacherId: "teacher-0001",
-    name: "Vinyasa Flow",
-    description:
-      "Flytende sekvenser som kombinerer bevegelse og pust. Kreativ og variert time.",
-    type: "single",
-    date: addDays(today, 4),
-    startTime: "17:00",
-    duration: 60,
-    capacity: 15,
-    price: 250,
-    location: "Studio A",
-    dropInAvailable: true,
-    bookedCount: 10,
-    tags: ["Vinyasa", "Flow", "Middels"],
-    createdAt: new Date("2024-10-12"),
-    updatedAt: new Date("2024-11-05"),
-  },
-];
 
 // Mock course sessions helper
 const generateCourseSessions = (
@@ -287,13 +188,6 @@ export const mockEvents: Event[] = [
     updatedAt: new Date("2024-11-03"),
   },
 ];
-
-/**
- * Get class by ID
- */
-export const getClassById = (id: string): Class | undefined => {
-  return mockClasses.find((c) => c.id === id);
-};
 
 /**
  * Get course by ID

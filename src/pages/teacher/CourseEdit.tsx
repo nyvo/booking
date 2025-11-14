@@ -39,10 +39,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { TimePicker } from "@/components/ui/time-picker";
 import {
   Dialog,
   DialogContent,
@@ -64,10 +72,6 @@ const courseFormSchema = z.object({
     .min(1, "Antall uker må være minst 1")
     .max(52, "Antall uker kan ikke overstige 52"),
   startDate: z.date({ required_error: "Startdato er påkrevd" }),
-  recurringDayOfWeek: z
-    .number()
-    .min(0, "Ugyldig ukedag")
-    .max(6, "Ugyldig ukedag"),
   recurringTime: z
     .string()
     .regex(
@@ -84,7 +88,6 @@ const courseFormSchema = z.object({
     .max(100, "Kapasitet kan ikke overstige 100"),
   price: z.number().min(0, "Pris kan ikke være negativ"),
   location: z.string().min(2, "Lokasjon må være minst 2 tegn"),
-  tags: z.string().optional(),
 });
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
@@ -113,13 +116,11 @@ export default function CourseEdit() {
       description: "",
       numberOfWeeks: 6,
       startDate: new Date(),
-      recurringDayOfWeek: 1,
       recurringTime: "10:00",
       duration: 60,
       capacity: 15,
       price: 200,
       location: "",
-      tags: "",
     },
   });
 
@@ -131,13 +132,11 @@ export default function CourseEdit() {
         description: courseData.description || "",
         numberOfWeeks: courseData.numberOfWeeks,
         startDate: new Date(courseData.startDate),
-        recurringDayOfWeek: courseData.recurringDayOfWeek,
         recurringTime: courseData.recurringTime,
         duration: courseData.duration,
         capacity: courseData.capacity,
         price: courseData.price,
         location: courseData.location,
-        tags: courseData.tags?.join(", ") || "",
       });
     }
   }, [courseData, form]);
@@ -156,26 +155,17 @@ export default function CourseEdit() {
         return;
       }
 
-      // Parse tags
-      const tags = values.tags
-        ? values.tags
-            .split(",")
-            .map((tag) => tag.trim())
-            .filter(Boolean)
-        : undefined;
-
       await update(id, {
         name: values.name,
         description: values.description || undefined,
         numberOfWeeks: values.numberOfWeeks,
         startDate: values.startDate,
-        recurringDayOfWeek: values.recurringDayOfWeek,
+        recurringDayOfWeek: values.startDate.getDay(),
         recurringTime: values.recurringTime,
         duration: values.duration,
         capacity: values.capacity,
         price: values.price,
         location: values.location,
-        tags,
       });
 
       // Navigate back to classes list on success
@@ -232,10 +222,10 @@ export default function CourseEdit() {
               Feil ved lasting
             </h1>
           </div>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
             <p className="font-medium">Kunne ikke laste kurs</p>
-            <p className="text-sm mt-1">
-              {loadError?.message || "Timen ble ikke funnet"}
+            <p className="text-sm mt-1.5">
+              {loadError?.message || "Kurset ble ikke funnet"}
             </p>
           </div>
           <Button onClick={() => navigate(ROUTES.TEACHER.COURSES)}>
@@ -292,14 +282,14 @@ export default function CourseEdit() {
 
         {/* Error Display */}
         {(submitError || error) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Feil:</p>
-            <p className="text-sm mt-1">{submitError || error?.message}</p>
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
+            <p className="font-medium">Noe gikk galt</p>
+            <p className="text-sm mt-1.5">{submitError || error?.message}</p>
           </div>
         )}
 
         {/* Form */}
-        <div className="rounded-lg border border-border bg-white p-6">
+        <div className="rounded-2xl border border-border bg-white p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Name */}
@@ -369,8 +359,8 @@ export default function CourseEdit() {
                 )}
               />
 
-              {/* Start Date, Day of Week, Time Row */}
-              <div className="grid gap-4 md:grid-cols-3">
+              {/* Start Date and Time Row */}
+              <div className="grid gap-4 md:grid-cols-2">
                 {/* Start Date */}
                 <FormField
                   control={form.control}
@@ -380,19 +370,18 @@ export default function CourseEdit() {
                       <FormLabel>Startdato *</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-start text-left font-normal"
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {field.value ? (
-                                format(field.value, "dd.MM.yyyy")
-                              ) : (
-                                <span>Velg dato</span>
-                              )}
-                            </Button>
-                          </FormControl>
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 justify-start text-left font-normal"
+                            type="button"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? (
+                              format(field.value, "dd.MM.yyyy")
+                            ) : (
+                              <span>Velg dato</span>
+                            )}
+                          </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
@@ -406,35 +395,9 @@ export default function CourseEdit() {
                           />
                         </PopoverContent>
                       </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Recurring Day of Week */}
-                <FormField
-                  control={form.control}
-                  name="recurringDayOfWeek"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ukedag *</FormLabel>
-                      <FormControl>
-                        <select
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(parseInt(e.target.value))
-                          }
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        >
-                          <option value={0}>Søndag</option>
-                          <option value={1}>Mandag</option>
-                          <option value={2}>Tirsdag</option>
-                          <option value={3}>Onsdag</option>
-                          <option value={4}>Torsdag</option>
-                          <option value={5}>Fredag</option>
-                          <option value={6}>Lørdag</option>
-                        </select>
-                      </FormControl>
+                      <FormDescription>
+                        Kurset gjentas hver uke på samme ukedag
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -445,10 +408,14 @@ export default function CourseEdit() {
                   control={form.control}
                   name="recurringTime"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                       <FormLabel>Tidspunkt *</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <TimePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Velg tidspunkt"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -538,31 +505,10 @@ export default function CourseEdit() {
                 )}
               />
 
-              {/* Tags */}
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="F.eks. Hatha, Nybegynner, Meditasjon"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Kommaseparerte tags (valgfritt)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Enrollment Info */}
               {courseData.enrolledCount > 0 && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                  <p className="text-sm text-blue-800">
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                  <p className="text-sm text-primary">
                     <strong>Info:</strong> {courseData.enrolledCount}{" "}
                     {courseData.enrolledCount === 1 ? "påmeldt" : "påmeldte"} på
                     dette kurset. Endringer i pris, dato eller tid blir
@@ -598,7 +544,7 @@ export default function CourseEdit() {
                 Er du sikker på at du vil slette dette kurset? Dette kan ikke
                 angres.
                 {courseData.enrolledCount > 0 && (
-                  <span className="block mt-2 font-medium text-red-600">
+                  <span className="block mt-2 font-medium text-destructive">
                     Advarsel: {courseData.enrolledCount} påmeldte på dette
                     kurset!
                   </span>

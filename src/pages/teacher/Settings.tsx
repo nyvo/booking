@@ -3,14 +3,15 @@
  * App preferences and configuration
  */
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Bell, Calendar, Mail } from 'lucide-react';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Bell, Calendar, Mail } from "lucide-react";
 
-import TeacherLayout from '@/components/layout/TeacherLayout';
-import { Button } from '@/components/ui/button';
+import TeacherLayout from "@/components/layout/TeacherLayout";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -18,9 +19,9 @@ import {
   FormField,
   FormItem,
   FormLabel,
-} from '@/components/ui/form';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 
 // Form validation schema
 const settingsFormSchema = z.object({
@@ -49,7 +50,7 @@ export default function Settings() {
 
   const onSubmit = async (values: SettingsFormValues) => {
     // In a real app, this would save to backend/localStorage
-    console.log('Settings saved:', values);
+    console.log("Settings saved:", values);
     setSubmitSuccess(true);
     setTimeout(() => setSubmitSuccess(false), 3000);
   };
@@ -58,36 +59,47 @@ export default function Settings() {
     <TeacherLayout>
       <div className="space-y-6">
         {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground">Innstillinger</h1>
-          <p className="mt-2 text-muted-foreground">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-semibold text-foreground">
+            Innstillinger
+          </h1>
+          <p className="text-muted-foreground">
             Administrer varslinger og preferanser
           </p>
         </div>
 
         {/* Success Message */}
         {submitSuccess && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">
-            <p className="font-medium">Innstillingene ble lagret!</p>
-          </div>
+          <Card className="border-primary/20 bg-primary/5 p-6">
+            <p className="font-medium text-primary">
+              Innstillingene ble lagret!
+            </p>
+          </Card>
         )}
 
         {/* Settings Form */}
-        <div className="rounded-lg border border-border bg-white">
-          <div className="p-6 border-b border-border">
-            <h2 className="text-lg font-semibold text-foreground">Varslinger</h2>
-            <p className="text-sm text-muted-foreground mt-1">
+        <Card className="p-0 gap-0 overflow-hidden">
+          <div className="px-8 py-6 border-b border-border/60">
+            <h2 className="text-2xl font-semibold text-foreground">
+              Varslinger
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2">
               Velg hvilke varslinger du vil motta
             </p>
           </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="p-8 space-y-8"
+            >
               {/* Email Notifications */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Mail className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-medium text-foreground">E-postvarslinger</h3>
+                  <h3 className="font-medium text-foreground">
+                    E-postvarslinger
+                  </h3>
                 </div>
 
                 <FormField
@@ -118,7 +130,9 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-medium text-foreground">Bookingvarslinger</h3>
+                  <h3 className="font-medium text-foreground">
+                    Bookingvarslinger
+                  </h3>
                 </div>
 
                 <FormField
@@ -170,7 +184,9 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Bell className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="font-medium text-foreground">Betalingsvarslinger</h3>
+                  <h3 className="font-medium text-foreground">
+                    Betalingsvarslinger
+                  </h3>
                 </div>
 
                 <FormField
@@ -223,13 +239,11 @@ export default function Settings() {
 
               {/* Form Actions */}
               <div className="pt-4">
-                <Button type="submit">
-                  Lagre innstillinger
-                </Button>
+                <Button type="submit">Lagre innstillinger</Button>
               </div>
             </form>
           </Form>
-        </div>
+        </Card>
       </div>
     </TeacherLayout>
   );

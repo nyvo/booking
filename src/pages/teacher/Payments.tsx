@@ -1,10 +1,11 @@
 /**
  * Payments page for teachers
  * Shows payment history and revenue statistics
+ * Compact layout with integrated stats per .cursorrules
  */
 
 import { useMemo, useState } from "react";
-import { DollarSign, TrendingUp, Clock, CheckCircle } from "lucide-react";
+import { Banknote, RotateCcw, Clock, CheckCircle } from "lucide-react";
 
 import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -13,12 +14,12 @@ import {
   useTeacherRevenue,
   useBookings,
 } from "@/hooks/useBookings";
-import { useClasses, useCourses, useEvents } from "@/hooks/useClasses";
+import { useCourses, useEvents } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useAuth";
 import { formatDate, formatCurrency } from "@/utils/date";
 import type { PaymentStatus } from "@/types";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -27,13 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const STATUS_LABELS: Record<PaymentStatus, string> = {
   paid: "Betalt",
@@ -65,7 +59,6 @@ export default function Payments() {
     user?.id,
   );
   const { data: students } = useStudents();
-  const { data: classes } = useClasses();
   const { data: courses } = useCourses();
   const { data: events } = useEvents();
   const { data: bookingsData } = useBookings();
@@ -75,8 +68,7 @@ export default function Payments() {
 
   // Enrich payments with student and item details
   const enrichedPayments = useMemo(() => {
-    if (!payments || !students || !classes || !courses || !events || !bookings)
-      return [];
+    if (!payments || !students || !courses || !events || !bookings) return [];
 
     return payments.map((payment) => {
       const student = students.find((s) => s.id === payment.studentId);
@@ -86,10 +78,7 @@ export default function Payments() {
 
       let itemName = "Ukjent";
       if (booking) {
-        if (booking.itemType === "single") {
-          const classItem = classes.find((c) => c.id === booking.itemId);
-          itemName = classItem?.name || "Ukjent time";
-        } else if (booking.itemType === "course") {
+        if (booking.itemType === "course") {
           const course = courses.find((c) => c.id === booking.itemId);
           itemName = course?.name || "Ukjent kurs";
         } else if (booking.itemType === "event") {
@@ -104,7 +93,7 @@ export default function Payments() {
         itemName,
       };
     });
-  }, [payments, students, classes, courses, events, bookings]);
+  }, [payments, students, courses, events, bookings]);
 
   // Filter payments by status
   const filteredPayments = useMemo(() => {
@@ -112,111 +101,310 @@ export default function Payments() {
     return enrichedPayments.filter((p) => p.status === statusFilter);
   }, [enrichedPayments, statusFilter]);
 
+  // Calculate current month revenue (for main headline)
+  const currentMonthRevenue = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    return enrichedPayments
+      .filter((p) => {
+        if (!p.paidAt) return false;
+        const paymentDate = new Date(p.paidAt);
+        return (
+          paymentDate.getMonth() === currentMonth &&
+          paymentDate.getFullYear() === currentYear &&
+          p.status === "paid"
+        );
+      })
+      .reduce((sum, p) => sum + p.amount, 0);
+  }, [enrichedPayments]);
+
+  // Calculate previous month revenue
+  const previousMonthRevenue = useMemo(() => {
+    const now = new Date();
+    const previousMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
+    const previousYear =
+      now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+
+    return enrichedPayments
+      .filter((p) => {
+        if (!p.paidAt) return false;
+        const paymentDate = new Date(p.paidAt);
+        return (
+          paymentDate.getMonth() === previousMonth &&
+          paymentDate.getFullYear() === previousYear &&
+          p.status === "paid"
+        );
+      })
+      .reduce((sum, p) => sum + p.amount, 0);
+  }, [enrichedPayments]);
+
+  // Calculate monthly statistics (current calendar month) - counts only
+  const monthlyStats = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const thisMonthPayments = enrichedPayments.filter((p) => {
+      // Check if payment belongs to current month
+      const paymentDate = p.paidAt
+        ? new Date(p.paidAt)
+        : p.dueDate
+          ? new Date(p.dueDate)
+          : null;
+
+      if (!paymentDate) return false;
+
+      return (
+        paymentDate.getMonth() === currentMonth &&
+        paymentDate.getFullYear() === currentYear
+      );
+    });
+
+    const paidCount = thisMonthPayments.filter(
+      (p) => p.status === "paid",
+    ).length;
+
+    const pendingCount = thisMonthPayments.filter(
+      (p) => p.status === "pending" || p.status === "overdue",
+    ).length;
+
+    const refundedCount = thisMonthPayments.filter(
+      (p) => p.status === "refunded",
+    ).length;
+
+    return {
+      paid: paidCount,
+      pending: pendingCount,
+      refunded: refundedCount,
+    };
+  }, [enrichedPayments]);
+
+  // Count payment statuses (for status message - all time)
+  const paymentCounts = useMemo(() => {
+    const pending = enrichedPayments.filter(
+      (p) => p.status === "pending",
+    ).length;
+    const overdue = enrichedPayments.filter(
+      (p) => p.status === "overdue",
+    ).length;
+    return { pending, overdue };
+  }, [enrichedPayments]);
+
+  // Generate dynamic status message with color
+  const statusInfo = useMemo(() => {
+    const { pending, overdue } = paymentCounts;
+
+    // Failed/overdue payments take priority
+    if (overdue > 0 && pending > 0) {
+      return {
+        message: `${pending} ${pending === 1 ? "ventende" : "ventende"} · ${overdue} ${overdue === 1 ? "krever oppmerksomhet" : "krever oppmerksomhet"}`,
+        color: "text-destructive",
+      };
+    }
+
+    if (overdue > 0) {
+      return {
+        message: `${overdue} ${overdue === 1 ? "betaling krever" : "betalinger krever"} oppmerksomhet.`,
+        color: "text-destructive",
+      };
+    }
+
+    if (pending > 0) {
+      return {
+        message: `Du har ${pending} ${pending === 1 ? "ventende betaling" : "ventende betalinger"}.`,
+        color: "text-amber-600",
+      };
+    }
+
+    // All clear
+    return {
+      message: "Alt er betalt – ingen utestående betalinger.",
+      color: "text-muted-foreground",
+    };
+  }, [paymentCounts]);
+
   const loading = loadingRevenue || loadingPayments;
 
   return (
     <TeacherLayout>
-      <div className="space-y-6">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground">Betalinger</h1>
-          <p className="mt-2 text-muted-foreground">
-            Oversikt over inntekter og betalingshistorikk
-          </p>
-        </div>
+      {/* Page Header */}
+      <div className="mx-auto max-w-4xl px-4 space-y-2 mb-8">
+        <h1 className="text-4xl font-semibold text-foreground">Betalinger</h1>
+        <p className="text-base text-muted-foreground">
+          Oversikt over inntekter og betalingshistorikk
+        </p>
+      </div>
 
-        {/* Revenue Stats */}
+      {/* Shared container for aligned cards */}
+      <div className="mx-auto max-w-4xl px-4 space-y-8">
+        {/* Single Summary Card with Integrated Stats */}
         {loading ? (
-          <div className="grid gap-4 md:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="rounded-lg border border-border bg-white p-6 animate-pulse"
-              >
-                <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
-                <div className="h-8 bg-gray-200 rounded w-3/4"></div>
-              </div>
-            ))}
-          </div>
+          <Card className="h-56 animate-pulse rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur" />
         ) : (
-          <div className="grid gap-4 md:grid-cols-4">
-            <div className="rounded-lg border border-border bg-white p-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <DollarSign className="h-4 w-4" />
-                <span>Total inntekt</span>
+          <Card className="rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur overflow-hidden">
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                background: `
+                  radial-gradient(circle at top left, rgba(78, 149, 255, 0.08), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(165, 180, 252, 0.12), transparent 55%)
+                `,
+              }}
+            />
+            <CardContent className="relative px-8 py-8 space-y-4">
+              {/* Main Summary - Tightened spacing */}
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Du har tjent
+                </p>
+                <p className="text-5xl font-semibold text-foreground">
+                  {formatCurrency(currentMonthRevenue)}
+                </p>
+                <p className="text-sm text-muted-foreground">denne måneden</p>
               </div>
-              <p className="text-3xl font-bold text-foreground">
-                {formatCurrency(revenueData?.total || 0)}
-              </p>
-            </div>
 
-            <div className="rounded-lg border border-border bg-white p-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Betalt</span>
+              {/* Dynamic Status Message with Color */}
+              <div>
+                <p className={`text-sm font-medium ${statusInfo.color}`}>
+                  {statusInfo.message}
+                </p>
               </div>
-              <p className="text-3xl font-bold text-green-600">
-                {formatCurrency(revenueData?.paid || 0)}
-              </p>
-            </div>
 
-            <div className="rounded-lg border border-border bg-white p-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <Clock className="h-4 w-4" />
-                <span>Venter betaling</span>
-              </div>
-              <p className="text-3xl font-bold text-yellow-600">
-                {formatCurrency(revenueData?.pending || 0)}
-              </p>
-            </div>
+              {/* Integrated Mini Stats Row - Supporting Metrics */}
+              <div className="pt-4 mt-4 border-t border-border/40">
+                <div className="grid grid-cols-4 gap-4">
+                  {/* Fullførte bookinger */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        Fullførte bookinger
+                      </span>
+                    </div>
+                    <p
+                      className={`text-base font-semibold ${
+                        monthlyStats.paid > 0
+                          ? "text-primary"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {monthlyStats.paid}
+                    </p>
+                  </div>
 
-            <div className="rounded-lg border border-border bg-white p-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                <TrendingUp className="h-4 w-4" />
-                <span>Antall betalinger</span>
+                  {/* Venter betaling */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        Venter betaling
+                      </span>
+                    </div>
+                    <p
+                      className={`text-base font-semibold ${
+                        monthlyStats.pending > 0
+                          ? "text-accent"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {monthlyStats.pending}
+                    </p>
+                  </div>
+
+                  {/* Refusjoner */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <RotateCcw className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        Refusjoner
+                      </span>
+                    </div>
+                    <p
+                      className={`text-base font-semibold ${
+                        monthlyStats.refunded > 0
+                          ? "text-destructive"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {monthlyStats.refunded}
+                    </p>
+                  </div>
+
+                  {/* Forrige måned */}
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Banknote className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        Forrige måned
+                      </span>
+                    </div>
+                    <p
+                      className={`text-base font-semibold ${
+                        previousMonthRevenue > 0
+                          ? "text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {formatCurrency(previousMonthRevenue)}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <p className="text-3xl font-bold text-foreground">
-                {payments.length}
-              </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Payments Table */}
-        <div className="rounded-lg border border-border bg-white">
-          <div className="p-6 border-b border-border flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-foreground">
+        {/* Payments History Card - Directly Below */}
+        <Card className="rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur overflow-hidden">
+          {/* Header */}
+          <div className="px-8 py-6 border-b border-border/60">
+            <h2 className="text-2xl font-semibold text-foreground">
               Betalingshistorikk
             </h2>
-
-            {/* Status Filter */}
-            <Select
-              value={statusFilter}
-              onValueChange={(value) =>
-                setStatusFilter(value as PaymentStatus | "all")
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filtrer status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle betalinger</SelectItem>
-                <SelectItem value="paid">Betalt</SelectItem>
-                <SelectItem value="pending">Venter</SelectItem>
-                <SelectItem value="overdue">Forfalt</SelectItem>
-                <SelectItem value="refunded">Refundert</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
+          {/* Filter Tabs - Improved spacing */}
+          <div className="px-8 py-4 border-b border-border/40 bg-muted/20">
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { value: "all", label: "Alle" },
+                { value: "paid", label: "Betalt" },
+                { value: "pending", label: "Venter" },
+                { value: "refunded", label: "Refundert" },
+              ].map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() =>
+                    setStatusFilter(filter.value as PaymentStatus | "all")
+                  }
+                  className={`
+                    px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer
+                    ${
+                      statusFilter === filter.value
+                        ? "bg-primary text-white"
+                        : "bg-white/60 text-muted-foreground hover:bg-white hover:text-foreground border border-border/40"
+                    }
+                  `}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Table */}
           {loading ? (
             <div className="p-12 text-center">
               <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto"></div>
-              <p className="mt-4 text-muted-foreground">Laster betalinger...</p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                Laster betalinger...
+              </p>
             </div>
           ) : filteredPayments.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 {statusFilter === "all"
                   ? "Ingen betalinger funnet"
                   : `Ingen betalinger med status "${STATUS_LABELS[statusFilter as PaymentStatus]}"`}
@@ -226,35 +414,51 @@ export default function Payments() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Dato</TableHead>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Produkt</TableHead>
-                    <TableHead>Beløp</TableHead>
-                    <TableHead>Betalingsmetode</TableHead>
-                    <TableHead>Status</TableHead>
+                  <TableRow className="border-border/40 hover:bg-transparent">
+                    <TableHead className="pl-8 text-xs font-semibold text-muted-foreground">
+                      Dato
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">
+                      Student
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">
+                      Beløp
+                    </TableHead>
+                    <TableHead className="text-xs font-semibold text-muted-foreground">
+                      Betalingsmetode
+                    </TableHead>
+                    <TableHead className="pr-8 text-xs font-semibold text-muted-foreground">
+                      Status
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-medium">
+                    <TableRow
+                      key={payment.id}
+                      className="border-border/40 hover:bg-muted/40 transition-colors"
+                    >
+                      <TableCell className="pl-8 text-sm text-muted-foreground">
                         {payment.paidAt
                           ? formatDate(new Date(payment.paidAt))
                           : payment.dueDate
                             ? `Forfaller ${formatDate(new Date(payment.dueDate))}`
                             : "-"}
                       </TableCell>
-                      <TableCell>{payment.studentName}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">
-                        {payment.itemName}
+                      <TableCell className="text-sm font-medium text-foreground">
+                        {payment.studentName}
                       </TableCell>
-                      <TableCell className="font-semibold">
+                      <TableCell className="text-sm font-semibold text-foreground">
                         {formatCurrency(payment.amount)}
                       </TableCell>
-                      <TableCell>{payment.paymentMethod || "-"}</TableCell>
-                      <TableCell>
-                        <Badge variant={STATUS_VARIANTS[payment.status]}>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {payment.paymentMethod || "-"}
+                      </TableCell>
+                      <TableCell className="pr-8">
+                        <Badge
+                          variant={STATUS_VARIANTS[payment.status]}
+                          className="rounded-full px-3"
+                        >
                           {STATUS_LABELS[payment.status]}
                         </Badge>
                       </TableCell>
@@ -265,15 +469,15 @@ export default function Payments() {
             </div>
           )}
 
-          {/* Summary Footer */}
+          {/* Summary Footer - Reduced visual weight */}
           {!loading && filteredPayments.length > 0 && (
-            <div className="p-4 border-t border-border bg-gray-50">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">
+            <div className="px-8 py-4 border-t border-border/60 bg-muted/20">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
                   Viser {filteredPayments.length}{" "}
                   {filteredPayments.length === 1 ? "betaling" : "betalinger"}
                 </span>
-                <span className="font-semibold text-foreground">
+                <span className="font-semibold">
                   Total:{" "}
                   {formatCurrency(
                     filteredPayments.reduce((sum, p) => sum + p.amount, 0),
@@ -282,7 +486,7 @@ export default function Payments() {
               </div>
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </TeacherLayout>
   );

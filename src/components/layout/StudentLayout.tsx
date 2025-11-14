@@ -6,7 +6,8 @@ import { type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { ROUTES } from "@/config/constants";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { BookOpen, Calendar, User, LogOut, Search } from "lucide-react";
+import { Leaf, Calendar, User, LogOut, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface StudentLayoutProps {
   children: ReactNode;
@@ -39,14 +40,14 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-white">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-white/80 backdrop-blur">
+        <div className="container mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-8">
             <Link
               to={ROUTES.STUDENT.BROWSE}
               className="flex items-center gap-2"
             >
-              <BookOpen className="h-6 w-6 text-primary" />
+              <Leaf className="h-6 w-6 text-primary" />
               <span className="text-xl font-semibold text-foreground">
                 Yoga Booking
               </span>
@@ -76,36 +77,37 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           <div className="flex items-center gap-4">
             {/* Dev: Role Switcher */}
             {import.meta.env.MODE === "development" && (
-              <button
+              <Button
                 onClick={() => switchRole("teacher")}
-                className="px-3 py-1.5 text-xs font-medium bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+                size="sm"
+                className="bg-primary/10 text-primary hover:bg-primary/20"
               >
                 Bytt til lærer
-              </button>
+              </Button>
             )}
 
             <div className="hidden sm:flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-muted-foreground" />
               <span className="text-foreground">{user?.name}</span>
             </div>
-            <button
+            <Button
               onClick={logout}
-              className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              variant="ghost"
+              size="sm"
+              className="gap-2"
             >
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Logg ut</span>
-            </button>
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {children}
-      </main>
+      <main className="mx-auto max-w-7xl px-6 py-8 lg:px-8">{children}</main>
 
       {/* Mobile Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/60 bg-white/80 backdrop-blur">
         <div className="flex items-center justify-around py-2">
           {navItems.map((item) => {
             const Icon = item.icon;

@@ -1,5 +1,6 @@
 /**
  * Main layout for teacher dashboard with ShadCN responsive sidebar
+ * Account section redesigned with compact card at bottom per .cursorrules
  */
 
 import { type ReactNode } from "react";
@@ -8,19 +9,16 @@ import { useTranslation } from "react-i18next";
 import { ROUTES } from "@/config/constants";
 import { useAuthContext } from "@/contexts/AuthContext";
 import {
-  LayoutDashboard,
+  Home,
   Calendar,
-  BookOpen,
+  Leaf,
   CalendarDays,
   Users,
   CreditCard,
-  User,
-  Settings,
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -31,6 +29,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
+import { AccountCard } from "./AccountCard";
 
 interface TeacherLayoutProps {
   children: ReactNode;
@@ -38,26 +38,28 @@ interface TeacherLayoutProps {
 
 export default function TeacherLayout({ children }: TeacherLayoutProps) {
   const { t } = useTranslation();
-  const { user, switchRole } = useAuthContext();
+  const { switchRole } = useAuthContext();
   const location = useLocation();
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    // Special case: Dashboard should only match exactly
+    if (path === ROUTES.TEACHER.DASHBOARD) {
+      return location.pathname === path;
+    }
+    // For other routes, check if current path starts with the nav item path
+    return location.pathname.startsWith(path);
+  };
 
   const navItems = [
     {
       title: t("nav.dashboard"),
       path: ROUTES.TEACHER.DASHBOARD,
-      icon: LayoutDashboard,
-    },
-    {
-      title: t("nav.classes"),
-      path: ROUTES.TEACHER.CLASSES,
-      icon: Calendar,
+      icon: Home,
     },
     {
       title: t("nav.courses"),
       path: ROUTES.TEACHER.COURSES,
-      icon: BookOpen,
+      icon: Leaf,
     },
     {
       title: t("nav.events"),
@@ -76,102 +78,87 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
     },
   ];
 
-  const accountItems = [
-    {
-      title: t("nav.profile"),
-      path: ROUTES.TEACHER.PROFILE,
-      icon: User,
-    },
-    {
-      title: t("nav.settings"),
-      path: ROUTES.TEACHER.SETTINGS,
-      icon: Settings,
-    },
-  ];
-
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
-        {/* Sidebar */}
-        <Sidebar>
-          <SidebarHeader>
-            <div className="flex items-center gap-2 px-2 py-4">
-              <BookOpen className="h-6 w-6 text-primary" />
-              <span className="text-lg font-semibold">Yoga Booking</span>
-            </div>
-          </SidebarHeader>
+        {/* Sidebar with flex layout */}
+        <Sidebar className="flex h-full flex-col">
+          {/* Logo + Navigation - Flex grow */}
+          <div className="flex-1 flex flex-col">
+            <SidebarHeader>
+              <div className="flex items-center gap-2 px-2 py-4">
+                <Leaf className="h-6 w-6 text-primary" />
+                <span className="text-lg font-semibold">Yoga Booking</span>
+              </div>
+            </SidebarHeader>
 
-          <SidebarContent>
-            {/* Main Navigation */}
-            <SidebarGroup>
-              <SidebarGroupLabel>Navigasjon</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {navItems.map((item) => (
-                    <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton asChild isActive={isActive(item.path)}>
-                        <Link to={item.path}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
+            <SidebarContent>
+              {/* Main Navigation */}
+              <SidebarGroup>
+                <SidebarGroupLabel>Navigasjon</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {navItems.map((item) => (
+                      <SidebarMenuItem key={item.path}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive(item.path)}
+                        >
+                          <Link to={item.path}>
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            </SidebarContent>
+          </div>
 
-            {/* Account Section */}
-            <SidebarGroup>
-              <SidebarGroupLabel>Konto</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {accountItems.map((item) => (
-                    <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton asChild isActive={isActive(item.path)}>
-                        <Link to={item.path}>
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <div className="px-2 py-2 text-sm text-muted-foreground">
-              {user?.name}
-            </div>
-          </SidebarFooter>
+          {/* Account Card - Pinned to bottom */}
+          <div className="mt-auto px-4 pb-4">
+            <AccountCard />
+          </div>
         </Sidebar>
 
         {/* Main Content Area */}
         <div className="flex flex-1 flex-col">
           {/* Sticky Header */}
-          <header className="sticky top-0 z-40 border-b border-border bg-white">
-            <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-              <SidebarTrigger />
+          <header className="sticky top-0 z-40 border-b border-border/60 bg-white/80 backdrop-blur">
+            <div className="flex h-16 items-center gap-4 px-6">
+              {/* Mobile: Icon + "Meny" label */}
+              <div className="md:hidden flex items-center gap-2 rounded-full bg-muted/50 px-3 py-2">
+                <SidebarTrigger />
+                <span className="text-sm font-medium text-foreground">
+                  Meny
+                </span>
+              </div>
+
+              {/* Desktop: Icon only */}
+              <div className="hidden md:block">
+                <SidebarTrigger />
+              </div>
 
               <div className="flex-1" />
 
               {/* Dev: Role Switcher */}
               {import.meta.env.MODE === "development" && (
-                <button
+                <Button
                   onClick={() => switchRole("student")}
-                  className="px-3 py-1.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors"
+                  size="sm"
+                  className="bg-accent/20 text-accent-foreground hover:bg-accent/30"
                 >
                   Bytt til student
-                </button>
+                </Button>
               )}
             </div>
           </header>
 
           {/* Page Content */}
           <main className="flex-1">
-            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
               {children}
             </div>
           </main>

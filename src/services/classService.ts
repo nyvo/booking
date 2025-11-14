@@ -1,140 +1,21 @@
 /**
- * Mock API service for classes, courses, and events
+ * Mock API service for courses and events
  */
 
 import type {
-  Class,
   Course,
   Event,
   FilterOptions,
   PaginatedResponse,
   PaginationParams,
 } from "@/types";
-import { mockClasses, mockCourses, mockEvents } from "@/mock-data/classes";
+import { mockCourses, mockEvents } from "@/mock-data/classes";
 import { mockApiCall, paginate, filterBySearch, MockApiError } from "./api";
 import { generateId } from "@/utils/id";
 
 // In-memory storage (simulates database)
-let classes = [...mockClasses];
 let courses = [...mockCourses];
 let events = [...mockEvents];
-
-/**
- * Get all classes with optional filtering and pagination
- */
-export const getClasses = async (
-  filters?: FilterOptions,
-  pagination?: PaginationParams,
-): Promise<PaginatedResponse<Class>> => {
-  return mockApiCall(() => {
-    let filtered = [...classes];
-
-    if (filters?.search) {
-      filtered = filterBySearch(filtered, filters.search, [
-        "name",
-        "description",
-        "location",
-      ]);
-    }
-
-    if (filters?.teacherId) {
-      filtered = filtered.filter((c) => c.teacherId === filters.teacherId);
-    }
-
-    if (filters?.dateFrom) {
-      filtered = filtered.filter((c) => new Date(c.date) >= filters.dateFrom!);
-    }
-
-    if (filters?.dateTo) {
-      filtered = filtered.filter((c) => new Date(c.date) <= filters.dateTo!);
-    }
-
-    if (filters?.dropInOnly) {
-      filtered = filtered.filter((c) => c.dropInAvailable);
-    }
-
-    if (pagination) {
-      return paginate(filtered, pagination);
-    }
-
-    return {
-      data: filtered,
-      total: filtered.length,
-      page: 1,
-      pageSize: filtered.length,
-      totalPages: 1,
-    };
-  });
-};
-
-/**
- * Get class by ID
- */
-export const getClassById = async (id: string): Promise<Class> => {
-  return mockApiCall(() => {
-    const classItem = classes.find((c) => c.id === id);
-    if (!classItem) {
-      throw new MockApiError("Class not found", 404);
-    }
-    return classItem;
-  });
-};
-
-/**
- * Create a new class
- */
-export const createClass = async (
-  data: Omit<Class, "id" | "createdAt" | "updatedAt" | "bookedCount">,
-): Promise<Class> => {
-  return mockApiCall(() => {
-    const newClass: Class = {
-      ...data,
-      id: generateId(),
-      bookedCount: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    classes.push(newClass);
-    return newClass;
-  });
-};
-
-/**
- * Update a class
- */
-export const updateClass = async (
-  id: string,
-  data: Partial<Class>,
-): Promise<Class> => {
-  return mockApiCall(() => {
-    const index = classes.findIndex((c) => c.id === id);
-    if (index === -1) {
-      throw new MockApiError("Class not found", 404);
-    }
-
-    classes[index] = {
-      ...classes[index],
-      ...data,
-      id,
-      updatedAt: new Date(),
-    };
-
-    return classes[index];
-  });
-};
-
-/**
- * Delete a class
- */
-export const deleteClass = async (id: string): Promise<void> => {
-  return mockApiCall(() => {
-    const index = classes.findIndex((c) => c.id === id);
-    if (index === -1) {
-      throw new MockApiError("Class not found", 404);
-    }
-    classes.splice(index, 1);
-  });
-};
 
 // ========== COURSES ==========
 

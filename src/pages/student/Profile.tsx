@@ -3,13 +3,13 @@
  * Allows students to view and edit their profile information
  */
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import StudentLayout from '@/components/layout/StudentLayout';
-import { useAuthContext } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import StudentLayout from "@/components/layout/StudentLayout";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -18,14 +18,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 // Form validation schema
 const profileFormSchema = z.object({
-  name: z.string().min(2, 'Navn må være minst 2 tegn').max(100),
-  email: z.string().email('Ugyldig e-postadresse'),
+  name: z.string().min(2, "Navn må være minst 2 tegn").max(100),
+  email: z.string().email("Ugyldig e-postadresse"),
   phone: z.string().optional(),
   emergencyContactName: z.string().optional(),
   emergencyContactRelation: z.string().optional(),
@@ -43,20 +43,20 @@ export default function Profile() {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: user?.name || '',
-      email: user?.email || '',
-      phone: user?.phone || '',
-      emergencyContactName: user?.emergencyContact?.name || '',
-      emergencyContactRelation: user?.emergencyContact?.relation || '',
-      emergencyContactPhone: user?.emergencyContact?.phone || '',
-      medicalNotes: user?.medicalNotes || '',
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      emergencyContactName: user?.emergencyContact?.name || "",
+      emergencyContactRelation: user?.emergencyContact?.relation || "",
+      emergencyContactPhone: user?.emergencyContact?.phone || "",
+      medicalNotes: user?.medicalNotes || "",
     },
   });
 
   const onSubmit = async (values: ProfileFormValues) => {
     try {
       // In a real app, this would call an API to update the profile
-      console.log('Profile update:', values);
+      console.log("Profile update:", values);
 
       setSubmitSuccess(true);
       setIsEditing(false);
@@ -65,7 +65,7 @@ export default function Profile() {
         setSubmitSuccess(false);
       }, 3000);
     } catch (err) {
-      console.error('Failed to update profile:', err);
+      console.error("Failed to update profile:", err);
     }
   };
 
@@ -75,27 +75,27 @@ export default function Profile() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">Min profil</h1>
+            <h1 className="text-3xl font-semibold text-foreground">
+              Min profil
+            </h1>
             <p className="mt-2 text-muted-foreground">
               Administrer din personlige informasjon
             </p>
           </div>
           {!isEditing && (
-            <Button onClick={() => setIsEditing(true)}>
-              Rediger profil
-            </Button>
+            <Button onClick={() => setIsEditing(true)}>Rediger profil</Button>
           )}
         </div>
 
         {/* Success Message */}
         {submitSuccess && (
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-800">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4 text-primary">
             <p className="font-medium">Profilen din er oppdatert!</p>
           </div>
         )}
 
         {/* Profile Form */}
-        <div className="rounded-lg border border-border bg-white p-8">
+        <div className="rounded-2xl border border-border bg-white p-8">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Basic Information */}
@@ -127,7 +127,11 @@ export default function Profile() {
                       <FormItem>
                         <FormLabel>E-post *</FormLabel>
                         <FormControl>
-                          <Input type="email" {...field} disabled={!isEditing} />
+                          <Input
+                            type="email"
+                            {...field}
+                            disabled={!isEditing}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -200,7 +204,11 @@ export default function Profile() {
                         <FormItem>
                           <FormLabel>Telefon</FormLabel>
                           <FormControl>
-                            <Input type="tel" {...field} disabled={!isEditing} />
+                            <Input
+                              type="tel"
+                              {...field}
+                              disabled={!isEditing}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -230,7 +238,8 @@ export default function Profile() {
                         />
                       </FormControl>
                       <FormDescription>
-                        Valgfri informasjon som kan være viktig for instruktøren å vite om
+                        Valgfri informasjon som kan være viktig for instruktøren
+                        å vite om
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -241,9 +250,7 @@ export default function Profile() {
               {/* Form Actions */}
               {isEditing && (
                 <div className="flex gap-4 pt-6">
-                  <Button type="submit">
-                    Lagre endringer
-                  </Button>
+                  <Button type="submit">Lagre endringer</Button>
                   <Button
                     type="button"
                     variant="outline"

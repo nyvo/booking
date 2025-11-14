@@ -11,7 +11,6 @@ import {
   Clock,
   MapPin,
   Users,
-  Tag,
   User as UserIcon,
 } from "lucide-react";
 import StudentLayout from "@/components/layout/StudentLayout";
@@ -108,8 +107,8 @@ export default function CourseDetail() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Tilbake
           </Button>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Kursrekken ble ikke funnet</p>
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
+            <p className="font-medium">Kurset ble ikke funnet</p>
           </div>
         </div>
       </StudentLayout>
@@ -129,7 +128,7 @@ export default function CourseDetail() {
         </Button>
 
         {/* Main Card */}
-        <div className="rounded-lg border border-border bg-white p-8">
+        <div className="rounded-2xl border border-border bg-white p-8">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-start justify-between mb-4">
@@ -264,7 +263,7 @@ export default function CourseDetail() {
                 {courseData.sessions.map((session) => (
                   <div
                     key={session.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -288,24 +287,6 @@ export default function CourseDetail() {
                       </p>
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Tags */}
-          {courseData.tags && courseData.tags.length > 0 && (
-            <div className="pt-6 border-t border-border">
-              <h3 className="font-medium text-foreground mb-3">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {courseData.tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 text-sm px-3 py-1 rounded-full bg-gray-100 text-gray-700"
-                  >
-                    <Tag className="h-3 w-3" />
-                    {tag}
-                  </span>
                 ))}
               </div>
             </div>
@@ -344,9 +325,9 @@ export default function CourseDetail() {
               <DialogDescription>
                 {bookingSuccess ? (
                   <div className="py-4 text-center">
-                    <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <svg
-                        className="h-8 w-8 text-green-600"
+                        className="h-8 w-8 text-primary"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -401,7 +382,7 @@ export default function CourseDetail() {
                     </div>
 
                     {bookingError && (
-                      <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-800 text-sm">
+                      <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-destructive/80 text-sm">
                         {bookingError}
                       </div>
                     )}

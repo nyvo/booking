@@ -5,13 +5,14 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Pencil } from "lucide-react";
+import { Calendar, Clock, MapPin } from "lucide-react";
 import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useCourses } from "@/hooks/useClasses";
 import { formatDisplayDate } from "@/utils/date";
-import { ROUTES } from "@/config/constants";
+import { ROUTES, CURRENCY } from "@/config/constants";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 const WEEKDAY_NAMES = [
   "Søndag",
@@ -41,7 +42,7 @@ export default function TeacherCourses() {
 
   return (
     <TeacherLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-5xl">
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -52,117 +53,116 @@ export default function TeacherCourses() {
               Administrer dine yogakurs
             </p>
           </div>
-          <button
+          <Button
             onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            variant="default"
           >
-            Opprett ny kursrekke
-          </button>
+            Opprett nytt kurs
+          </Button>
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
             <p className="font-medium">Kunne ikke laste kurs</p>
-            <p className="text-sm mt-1">{error.message}</p>
+            <p className="text-sm mt-1.5">{error.message}</p>
           </div>
         )}
 
         {/* Courses List */}
-        <div className="rounded-lg border border-border bg-white">
-          <div className="divide-y divide-border">
-            {loading ? (
-              <div className="p-6">
-                <div className="space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div
-                      key={i}
-                      className="h-24 animate-pulse rounded bg-secondary"
-                    ></div>
-                  ))}
-                </div>
-              </div>
-            ) : data?.data.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="text-muted-foreground">Du har ingen kurs ennå</p>
-                <button
-                  onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
-                  className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-                >
-                  Opprett ditt første kurs
-                </button>
-              </div>
-            ) : (
-              data?.data.map((course) => (
-                <div
-                  key={course.id}
-                  className="p-6 transition-colors hover:bg-secondary/50"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 space-y-2">
-                      <h3 className="text-lg font-semibold text-foreground">
-                        {course.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {course.description}
-                      </p>
-                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
+        {loading ? (
+          <div className="grid gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-6">
+                <div className="h-32 animate-pulse rounded bg-secondary"></div>
+              </Card>
+            ))}
+          </div>
+        ) : data?.data.length === 0 ? (
+          <Card className="p-12 text-center">
+            <p className="text-muted-foreground">Du har ingen kurs ennå</p>
+            <Button
+              onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
+              className="mt-4"
+              variant="default"
+            >
+              Opprett ditt første kurs
+            </Button>
+          </Card>
+        ) : (
+          <div className="max-w-5xl space-y-4">
+            {data?.data.map((course) => (
+              <Card
+                key={course.id}
+                className="rounded-2xl border border-border bg-white shadow-sm px-6 py-5 cursor-pointer transition-all hover:bg-primary/5 hover:border-primary/30 hover:shadow"
+                onClick={() =>
+                  navigate(
+                    ROUTES.TEACHER.COURSES_DETAIL.replace(":id", course.id),
+                  )
+                }
+              >
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex-1 min-w-0 space-y-2.5">
+                    <h3 className="text-lg font-semibold text-foreground leading-tight">
+                      {course.name}
+                    </h3>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <Calendar className="h-4 w-4 text-primary shrink-0" />
+                        <span>{formatDisplayDate(course.startDate)}</span>
+                        <span className="text-muted-foreground/40 mx-1">|</span>
+                        <Clock className="h-4 w-4 text-primary shrink-0" />
                         <span>
-                          Starter: {formatDisplayDate(course.startDate)}
+                          {WEEKDAY_NAMES[course.recurringDayOfWeek]}{" "}
+                          {course.recurringTime} ({course.duration} min)
                         </span>
-                        <span>{course.numberOfWeeks} uker</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm text-foreground">
+                        <MapPin className="h-4 w-4 text-primary shrink-0" />
                         <span>
-                          {WEEKDAY_NAMES[course.recurringDayOfWeek]} kl.{" "}
-                          {course.recurringTime}
+                          {course.location} • {course.numberOfWeeks} uker
                         </span>
-                        <span>{course.duration} min</span>
-                        <span>{course.location}</span>
-                      </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <span>{course.sessions.length} økter</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {course.tags?.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-3">
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-foreground">
-                          {course.enrolledCount}/{course.capacity} påmeldte
+
+                    {course.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed max-w-lg">
+                        {course.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col items-start md:items-end shrink-0 md:w-[130px]">
+                    <div className="flex md:flex-col gap-6 md:gap-2.5 w-full">
+                      <div className="flex-1 md:flex-none text-left md:text-right">
+                        <div className="text-xl font-semibold text-foreground leading-none">
+                          {course.enrolledCount}
+                          <span className="text-base text-muted-foreground font-normal">
+                            /{course.capacity}
+                          </span>
                         </div>
-                        <div className="mt-1 text-lg font-semibold text-foreground">
-                          {course.price} NOK
+                        <div className="text-xs text-muted-foreground mt-1">
+                          påmeldte
                         </div>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() =>
-                          navigate(
-                            ROUTES.TEACHER.COURSES_EDIT.replace(
-                              ":id",
-                              course.id,
-                            ),
-                          )
-                        }
-                      >
-                        <Pencil className="mr-2 h-4 w-4" />
-                        Rediger
-                      </Button>
+
+                      <div className="flex-1 md:flex-none text-left md:text-right">
+                        <div className="text-xl font-semibold text-foreground leading-none">
+                          {course.price}
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {CURRENCY}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              ))
-            )}
+              </Card>
+            ))}
           </div>
-        </div>
+        )}
       </div>
     </TeacherLayout>
   );

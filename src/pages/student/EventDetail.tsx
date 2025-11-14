@@ -11,7 +11,6 @@ import {
   Clock,
   MapPin,
   Users,
-  Tag,
   User as UserIcon,
 } from "lucide-react";
 import StudentLayout from "@/components/layout/StudentLayout";
@@ -98,7 +97,7 @@ export default function EventDetail() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Tilbake
           </Button>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
             <p className="font-medium">Arrangementet ble ikke funnet</p>
           </div>
         </div>
@@ -119,7 +118,7 @@ export default function EventDetail() {
         </Button>
 
         {/* Main Card */}
-        <div className="rounded-lg border border-border bg-white p-8">
+        <div className="rounded-2xl border border-border bg-white p-8">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-start justify-between mb-4">
@@ -211,7 +210,7 @@ export default function EventDetail() {
                 </div>
 
                 {eventData.dropInAvailable && (
-                  <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-md">
+                  <div className="flex items-center gap-2 text-sm text-primary bg-primary/10 px-3 py-2 rounded-full">
                     <svg
                       className="h-4 w-4"
                       fill="none"
@@ -242,24 +241,6 @@ export default function EventDetail() {
               </Button>
             </div>
           </div>
-
-          {/* Tags */}
-          {eventData.tags && eventData.tags.length > 0 && (
-            <div className="pt-6 border-t border-border">
-              <h3 className="font-medium text-foreground mb-3">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {eventData.tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1 text-sm px-3 py-1 rounded-full bg-gray-100 text-gray-700"
-                  >
-                    <Tag className="h-3 w-3" />
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
 
           {/* Teacher Info */}
           {eventData.teacher && (
@@ -294,9 +275,9 @@ export default function EventDetail() {
               <DialogDescription>
                 {bookingSuccess ? (
                   <div className="py-4 text-center">
-                    <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                       <svg
-                        className="h-8 w-8 text-green-600"
+                        className="h-8 w-8 text-primary"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -347,7 +328,7 @@ export default function EventDetail() {
                     </div>
 
                     {bookingError && (
-                      <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-800 text-sm">
+                      <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 text-destructive/80 text-sm">
                         {bookingError}
                       </div>
                     )}

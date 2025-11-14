@@ -1,10 +1,9 @@
 /**
- * Custom hooks for managing classes, courses, and events
+ * Custom hooks for managing courses and events
  */
 
 import { useState, useEffect } from "react";
 import type {
-  Class,
   Course,
   Event,
   FilterOptions,
@@ -12,11 +11,6 @@ import type {
   PaginationParams,
 } from "@/types";
 import {
-  getClasses,
-  getClassById,
-  createClass,
-  updateClass,
-  deleteClass,
   getCourses,
   getCourseById,
   createCourse,
@@ -28,133 +22,6 @@ import {
   updateEvent,
   deleteEvent,
 } from "@/services/classService";
-
-/**
- * Hook to fetch classes with filtering and pagination
- */
-export const useClasses = (
-  filters?: FilterOptions,
-  pagination?: PaginationParams,
-) => {
-  const [data, setData] = useState<PaginatedResponse<Class> | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        setLoading(true);
-        const result = await getClasses(filters || {}, pagination);
-        setData(result);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch classes"),
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClasses();
-  }, [filters, pagination]);
-
-  return { data, loading, error };
-};
-
-/**
- * Hook to fetch a single class by ID
- */
-export const useClass = (id: string | undefined) => {
-  const [data, setData] = useState<Class | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchClass = async () => {
-      try {
-        setLoading(true);
-        const result = await getClassById(id);
-        setData(result);
-        setError(null);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error("Failed to fetch class"),
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchClass();
-  }, [id]);
-
-  return { data, loading, error };
-};
-
-/**
- * Hook to manage class mutations (create, update, delete)
- */
-export const useClassMutations = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const create = async (
-    data: Omit<Class, "id" | "createdAt" | "updatedAt" | "bookedCount">,
-  ) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await createClass(data);
-      return result;
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error("Failed to create class");
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const update = async (id: string, data: Partial<Class>) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const result = await updateClass(id, data);
-      return result;
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error("Failed to update class");
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const remove = async (id: string) => {
-    try {
-      setLoading(true);
-      setError(null);
-      await deleteClass(id);
-    } catch (err) {
-      const error =
-        err instanceof Error ? err : new Error("Failed to delete class");
-      setError(error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { create, update, remove, loading, error };
-};
 
 // ========== COURSES ==========
 

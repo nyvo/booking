@@ -1,44 +1,47 @@
 /**
  * Design tokens for the yoga booking app
- * Defines colors, spacing, typography, and other design variables
+ * Aligned with .cursorrules design system
+ * Note: Most styling should use Tailwind CSS classes and CSS variables.
+ * This file is for reference and programmatic access only.
  */
 
 export const colors = {
   primary: {
-    DEFAULT: '#3B82F6',
-    light: '#60A5FA',
-    dark: '#2563EB',
-    foreground: '#FFFFFF',
+    DEFAULT: "#4E95FF", // Soft blue per .cursorrules
+    foreground: "#FFFFFF",
+  },
+  accent: {
+    DEFAULT: "#A5B4FC", // Soft lavender per .cursorrules
+    mint: "#A7F3D0", // Alternative accent
   },
   background: {
-    DEFAULT: '#FFFFFF',
-    secondary: '#F8FAFC',
-    tertiary: '#F1F5F9',
+    DEFAULT: "#F9FAFB", // Very light neutral per .cursorrules
+    surface: "#FFFFFF",
   },
   text: {
-    primary: '#0F172A',
-    secondary: '#475569',
-    tertiary: '#94A3B8',
+    primary: "#0F172A",
+    secondary: "#64748B", // muted
+    tertiary: "#94A3B8",
   },
   border: {
-    DEFAULT: '#E2E8F0',
-    light: '#F1F5F9',
+    DEFAULT: "#E5E7EB", // Light gray per .cursorrules
   },
-  success: '#10B981',
-  warning: '#F59E0B',
-  error: '#EF4444',
-  info: '#3B82F6',
+  success: "#10B981",
+  warning: "#F59E0B",
+  error: "#EF4444",
 } as const;
 
+/**
+ * Spacing scale per .cursorrules
+ * Allowed values: 4, 8, 12, 16, 24, 32
+ */
 export const spacing = {
-  xs: '0.25rem',
-  sm: '0.5rem',
-  md: '1rem',
-  lg: '1.5rem',
-  xl: '2rem',
-  '2xl': '3rem',
-  '3xl': '4rem',
-  '4xl': '6rem',
+  1: "4px", // 0.25rem
+  2: "8px", // 0.5rem
+  3: "12px", // 0.75rem
+  4: "16px", // 1rem
+  6: "24px", // 1.5rem
+  8: "32px", // 2rem
 } as const;
 
 export const typography = {
@@ -46,16 +49,22 @@ export const typography = {
     sans: "'Geist', system-ui, -apple-system, sans-serif",
     mono: "'Geist Mono', monospace",
   },
+  /**
+   * Typography scale per .cursorrules
+   * h1: text-3xl–text-4xl
+   * h2: text-2xl
+   * h3: text-xl
+   * Body: text-sm–text-base
+   * Meta: text-xs
+   */
   fontSize: {
-    xs: '0.75rem',
-    sm: '0.875rem',
-    base: '1rem',
-    lg: '1.125rem',
-    xl: '1.25rem',
-    '2xl': '1.5rem',
-    '3xl': '1.875rem',
-    '4xl': '2.25rem',
-    '5xl': '3rem',
+    xs: "0.75rem", // 12px - meta text
+    sm: "0.875rem", // 14px - body
+    base: "1rem", // 16px - body
+    xl: "1.25rem", // 20px - h3
+    "2xl": "1.5rem", // 24px - h2
+    "3xl": "1.875rem", // 30px - h1
+    "4xl": "2.25rem", // 36px - h1
   },
   fontWeight: {
     normal: 400,
@@ -70,23 +79,29 @@ export const typography = {
   },
 } as const;
 
+/**
+ * Border radius per .cursorrules
+ * Cards: rounded-xl, rounded-2xl, rounded-3xl
+ * Pills: rounded-full
+ * Avoid: rounded-sm
+ */
 export const borderRadius = {
-  sm: '0.25rem',
-  md: '0.5rem',
-  lg: '0.75rem',
-  xl: '1rem',
-  full: '9999px',
+  xl: "0.75rem", // 12px
+  "2xl": "1rem", // 16px
+  "3xl": "1.5rem", // 24px
+  full: "9999px", // Full rounded for pills/badges
 } as const;
 
+/**
+ * Shadows per .cursorrules
+ * Use minimal shadow - cards should be light
+ */
 export const shadows = {
-  sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-  md: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-  lg: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-  xl: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+  sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)", // Minimal for cards
 } as const;
 
 export const transitions = {
-  fast: '150ms',
-  normal: '300ms',
-  slow: '500ms',
+  fast: "150ms",
+  normal: "300ms",
+  slow: "500ms",
 } as const;

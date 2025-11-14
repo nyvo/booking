@@ -1,12 +1,12 @@
 /**
- * Student browse page - shows all available classes, courses, and events
+ * Student browse page - shows all available courses and events
  */
 
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import StudentLayout from "@/components/layout/StudentLayout";
-import { useClasses, useCourses, useEvents } from "@/hooks/useClasses";
+import { useCourses, useEvents } from "@/hooks/useClasses";
 import { formatDate, formatTime, formatCurrency } from "@/utils/date";
 import { ROUTES } from "@/config/constants";
 import { Button } from "@/components/ui/button";
@@ -20,11 +20,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type ItemType = "all" | "single" | "course" | "event";
+type ItemType = "all" | "course" | "event";
 
 export default function Browse() {
   const navigate = useNavigate();
-  const { data: classes, loading: loadingClasses } = useClasses();
   const { data: courses, loading: loadingCourses } = useCourses();
   const { data: events, loading: loadingEvents } = useEvents();
 
@@ -35,17 +34,6 @@ export default function Browse() {
   // Combine all items with type information
   const allItems = useMemo(() => {
     const items = [];
-
-    if (classes?.data) {
-      items.push(
-        ...classes.data.map((c) => ({
-          ...c,
-          itemType: "single" as const,
-          displayDate: c.date,
-          availableSpots: c.capacity - c.bookedCount,
-        })),
-      );
-    }
 
     if (courses?.data) {
       items.push(
@@ -70,7 +58,7 @@ export default function Browse() {
     }
 
     return items;
-  }, [classes, courses, events]);
+  }, [courses, events]);
 
   // Filter and sort items
   const filteredItems = useMemo(() => {
@@ -87,8 +75,7 @@ export default function Browse() {
       filtered = filtered.filter(
         (item) =>
           item.name.toLowerCase().includes(search) ||
-          item.description?.toLowerCase().includes(search) ||
-          item.tags?.some((tag) => tag.toLowerCase().includes(search)),
+          item.description?.toLowerCase().includes(search),
       );
     }
 
@@ -105,12 +92,10 @@ export default function Browse() {
     return filtered;
   }, [allItems, filterType, searchTerm, sortBy]);
 
-  const loading = loadingClasses || loadingCourses || loadingEvents;
+  const loading = loadingCourses || loadingEvents;
 
   const handleItemClick = (item: (typeof filteredItems)[0]) => {
-    if (item.itemType === "single") {
-      navigate(ROUTES.STUDENT.CLASS_DETAIL.replace(":id", item.id));
-    } else if (item.itemType === "course") {
+    if (item.itemType === "course") {
       navigate(ROUTES.STUDENT.COURSE_DETAIL.replace(":id", item.id));
     } else {
       navigate(ROUTES.STUDENT.EVENT_DETAIL.replace(":id", item.id));
@@ -118,15 +103,13 @@ export default function Browse() {
   };
 
   const getTypeLabel = (type: string) => {
-    if (type === "single") return "Enkeltkurs";
-    if (type === "course") return "Kursrekke";
+    if (type === "course") return "Kurs";
     return "Arrangement";
   };
 
   const getTypeBadgeColor = (type: string) => {
-    if (type === "single") return "bg-blue-100 text-blue-800";
-    if (type === "course") return "bg-purple-100 text-purple-800";
-    return "bg-green-100 text-green-800";
+    if (type === "course") return "bg-accent/10 text-accent";
+    return "bg-primary/10 text-primary";
   };
 
   return (
@@ -138,7 +121,7 @@ export default function Browse() {
             Utforsk yogatimer
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Finn og book dine favoritt enkeltkurs, kursrekker og arrangement
+            Finn og book dine favoritt kurs og arrangement
           </p>
         </div>
 
@@ -146,7 +129,7 @@ export default function Browse() {
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           {/* Search */}
           <Input
-            placeholder="Søk etter navn, beskrivelse eller tags..."
+            placeholder="Søk etter navn eller beskrivelse..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="flex-1"
@@ -162,8 +145,7 @@ export default function Browse() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Alle typer</SelectItem>
-              <SelectItem value="single">Enkeltkurs</SelectItem>
-              <SelectItem value="course">Kursrekker</SelectItem>
+              <SelectItem value="course">Kurs</SelectItem>
               <SelectItem value="event">Arrangement</SelectItem>
             </SelectContent>
           </Select>
@@ -218,7 +200,7 @@ export default function Browse() {
             {filteredItems.map((item) => (
               <div
                 key={`${item.itemType}-${item.id}`}
-                className="rounded-lg border border-border bg-white p-6 transition-shadow hover:shadow-md cursor-pointer"
+                className="rounded-2xl border border-border bg-white p-6 transition-shadow hover:shadow-sm cursor-pointer"
                 onClick={() => handleItemClick(item)}
               >
                 {/* Type Badge */}

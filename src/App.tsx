@@ -8,23 +8,20 @@ import Home from "@/pages/Home";
 
 // Teacher pages
 import TeacherDashboard from "@/pages/teacher/Dashboard";
-import TeacherClasses from "@/pages/teacher/Classes";
-import ClassCreate from "@/pages/teacher/ClassCreate";
-import ClassEdit from "@/pages/teacher/ClassEdit";
 import TeacherCourses from "@/pages/teacher/Courses";
 import CourseCreate from "@/pages/teacher/CourseCreate";
+import CourseDetail from "@/pages/teacher/CourseDetail";
 import CourseEdit from "@/pages/teacher/CourseEdit";
 import TeacherEvents from "@/pages/teacher/Events";
 import EventCreate from "@/pages/teacher/EventCreate";
+import EventDetail from "@/pages/teacher/EventDetail";
 import EventEdit from "@/pages/teacher/EventEdit";
 import TeacherStudents from "@/pages/teacher/Students";
 import StudentDetail from "@/pages/teacher/StudentDetail";
 import TeacherPayments from "@/pages/teacher/Payments";
-import TeacherProfile from "@/pages/teacher/Profile";
-import TeacherSettings from "@/pages/teacher/Settings";
+import TeacherAccount from "@/pages/teacher/Account";
 // Student pages
 import StudentBrowse from "@/pages/student/Browse";
-import StudentClassDetail from "@/pages/student/ClassDetail";
 import StudentCourseDetail from "@/pages/student/CourseDetail";
 import StudentEventDetail from "@/pages/student/EventDetail";
 import StudentBookings from "@/pages/student/Bookings";
@@ -47,29 +44,18 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Legacy classes routes - redirect to unified courses */}
           <Route
             path={ROUTES.TEACHER.CLASSES}
-            element={
-              <ProtectedRoute allowedRoles={["teacher"]}>
-                <TeacherClasses />
-              </ProtectedRoute>
-            }
+            element={<Navigate to={ROUTES.TEACHER.COURSES} replace />}
           />
           <Route
             path={ROUTES.TEACHER.CLASSES_CREATE}
-            element={
-              <ProtectedRoute allowedRoles={["teacher"]}>
-                <ClassCreate />
-              </ProtectedRoute>
-            }
+            element={<Navigate to={ROUTES.TEACHER.COURSES_CREATE} replace />}
           />
           <Route
             path={ROUTES.TEACHER.CLASSES_EDIT}
-            element={
-              <ProtectedRoute allowedRoles={["teacher"]}>
-                <ClassEdit />
-              </ProtectedRoute>
-            }
+            element={<Navigate to={ROUTES.TEACHER.COURSES} replace />}
           />
           <Route
             path={ROUTES.TEACHER.COURSES}
@@ -84,6 +70,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["teacher"]}>
                 <CourseCreate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.TEACHER.COURSES_DETAIL}
+            element={
+              <ProtectedRoute allowedRoles={["teacher"]}>
+                <CourseDetail />
               </ProtectedRoute>
             }
           />
@@ -108,6 +102,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["teacher"]}>
                 <EventCreate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path={ROUTES.TEACHER.EVENTS_DETAIL}
+            element={
+              <ProtectedRoute allowedRoles={["teacher"]}>
+                <EventDetail />
               </ProtectedRoute>
             }
           />
@@ -144,20 +146,21 @@ function App() {
             }
           />
           <Route
-            path={ROUTES.TEACHER.PROFILE}
+            path={ROUTES.TEACHER.ACCOUNT}
             element={
               <ProtectedRoute allowedRoles={["teacher"]}>
-                <TeacherProfile />
+                <TeacherAccount />
               </ProtectedRoute>
             }
           />
+          {/* Legacy routes - redirect to unified Account page */}
+          <Route
+            path={ROUTES.TEACHER.PROFILE}
+            element={<Navigate to={ROUTES.TEACHER.ACCOUNT} replace />}
+          />
           <Route
             path={ROUTES.TEACHER.SETTINGS}
-            element={
-              <ProtectedRoute allowedRoles={["teacher"]}>
-                <TeacherSettings />
-              </ProtectedRoute>
-            }
+            element={<Navigate to={ROUTES.TEACHER.ACCOUNT} replace />}
           />
 
           {/* Student routes - Protected */}
@@ -169,13 +172,10 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Legacy class detail route - redirect to browse */}
           <Route
             path={ROUTES.STUDENT.CLASS_DETAIL}
-            element={
-              <ProtectedRoute allowedRoles={["student"]}>
-                <StudentClassDetail />
-              </ProtectedRoute>
-            }
+            element={<Navigate to={ROUTES.STUDENT.BROWSE} replace />}
           />
           <Route
             path={ROUTES.STUDENT.COURSE_DETAIL}

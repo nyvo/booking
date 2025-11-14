@@ -2,13 +2,13 @@
  * Core TypeScript types and interfaces for the yoga booking app
  */
 
-export type UserRole = 'teacher' | 'student';
+export type UserRole = "teacher" | "student";
 
-export type ClassType = 'single' | 'course' | 'event';
+export type ClassType = "course" | "event";
 
-export type BookingStatus = 'confirmed' | 'pending' | 'cancelled' | 'completed';
+export type BookingStatus = "confirmed" | "pending" | "cancelled" | "completed";
 
-export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'refunded';
+export type PaymentStatus = "paid" | "pending" | "overdue" | "refunded";
 
 export interface User {
   id: string;
@@ -22,41 +22,20 @@ export interface User {
 }
 
 export interface Teacher extends User {
-  role: 'teacher';
+  role: "teacher";
   bio?: string;
   specialties?: string[];
   website?: string;
 }
 
 export interface Student extends User {
-  role: 'student';
+  role: "student";
   emergencyContact?: {
     name: string;
     phone: string;
     relationship: string;
   };
   medicalNotes?: string;
-}
-
-export interface Class {
-  id: string;
-  teacherId: string;
-  teacher?: Teacher;
-  name: string;
-  description?: string;
-  type: ClassType;
-  date: Date;
-  startTime: string;
-  duration: number;
-  capacity: number;
-  price: number;
-  location: string;
-  dropInAvailable: boolean;
-  bookedCount: number;
-  imageUrl?: string;
-  tags?: string[];
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface CourseSession {
@@ -87,7 +66,6 @@ export interface Course {
   sessions: CourseSession[];
   enrolledCount: number;
   imageUrl?: string;
-  tags?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -108,7 +86,6 @@ export interface Event {
   dropInAvailable: boolean;
   bookedCount: number;
   imageUrl?: string;
-  tags?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -119,7 +96,7 @@ export interface Booking {
   student?: Student;
   itemId: string;
   itemType: ClassType;
-  item?: Class | Course | Event;
+  item?: Course | Event;
   bookingDate: Date;
   status: BookingStatus;
   paymentId?: string;
@@ -154,8 +131,7 @@ export interface Attendance {
   booking?: Booking;
   studentId: string;
   student?: Student;
-  classId: string;
-  class?: Class;
+  sessionId: string;
   attended: boolean;
   notes?: string;
   recordedAt: Date;

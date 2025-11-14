@@ -69,7 +69,6 @@ const eventFormSchema = z.object({
   price: z.number().min(0, "Pris kan ikke være negativ"),
   location: z.string().min(2, "Lokasjon må være minst 2 tegn"),
   dropInAvailable: z.boolean().default(true),
-  tags: z.string().optional(),
 });
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
@@ -93,7 +92,6 @@ export default function EventCreate() {
       price: 200,
       location: "",
       dropInAvailable: true,
-      tags: "",
     },
   });
 
@@ -105,14 +103,6 @@ export default function EventCreate() {
         setSubmitError("Du må være innlogget for å opprette en event");
         return;
       }
-
-      // Parse tags
-      const tags = values.tags
-        ? values.tags
-            .split(",")
-            .map((tag) => tag.trim())
-            .filter(Boolean)
-        : undefined;
 
       await create({
         teacherId: user.id,
@@ -126,7 +116,6 @@ export default function EventCreate() {
         price: values.price,
         location: values.location,
         dropInAvailable: values.dropInAvailable,
-        tags,
       });
 
       // Navigate back to classes list on success
@@ -174,14 +163,14 @@ export default function EventCreate() {
 
         {/* Error Display */}
         {(submitError || error) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Feil ved opprettelse:</p>
-            <p className="text-sm mt-1">{submitError || error?.message}</p>
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
+            <p className="font-medium">Noe gikk galt</p>
+            <p className="text-sm mt-1.5">{submitError || error?.message}</p>
           </div>
         )}
 
         {/* Form */}
-        <div className="rounded-lg border border-border bg-white p-6">
+        <div className="rounded-2xl border border-border bg-white p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Name */}
@@ -362,27 +351,6 @@ export default function EventCreate() {
                       <Input placeholder="F.eks. Yoga Studio Oslo" {...field} />
                     </FormControl>
                     <FormDescription>Hvor eventn finner sted</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Tags */}
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="F.eks. Hatha, Nybegynner, Meditasjon"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Kommaseparerte tags (valgfritt)
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

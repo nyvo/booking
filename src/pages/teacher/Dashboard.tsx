@@ -1,393 +1,431 @@
 /**
- * Teacher dashboard home page with overview stats
+ * Teacher dashboard - refined calm, premium yoga instructor experience
+ * Unified design with primary blue accent and improved visual hierarchy
  */
 
 import { useMemo } from "react";
-import { Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import {
+  Calendar,
+  Leaf,
+  CalendarDays,
+  CalendarPlus,
+  Users,
+  Banknote,
+  MapPin,
+  Clock,
+  TrendingUp,
+  Plus,
+  ChevronRight,
+} from "lucide-react";
 import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useTeacherRevenue, useBookings } from "@/hooks/useBookings";
-import { useClasses, useCourses, useEvents } from "@/hooks/useClasses";
-import { useStudents } from "@/hooks/useAuth";
-import { formatDisplayDate, formatTime } from "@/utils/date";
+import { useCourses, useEvents } from "@/hooks/useClasses";
+import { formatDisplayDate } from "@/utils/date";
 import { CURRENCY, ROUTES } from "@/config/constants";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export default function TeacherDashboard() {
-  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useAuthContext();
-
   const teacherId = user?.id;
 
-  // Create stable date reference (today at midnight for consistent filtering)
+  // Date references
   const today = useMemo(() => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
     return date;
   }, []);
 
-  // Create stable filter and pagination objects (only when teacherId is available)
-  const classFilters = useMemo(
+  const startOfWeek = useMemo(() => {
+    const date = new Date(today);
+    const day = date.getDay();
+    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
+    date.setDate(diff);
+    return date;
+  }, [today]);
+
+  const endOfWeek = useMemo(() => {
+    const date = new Date(startOfWeek);
+    date.setDate(date.getDate() + 6);
+    return date;
+  }, [startOfWeek]);
+
+  const tomorrow = useMemo(() => {
+    const date = new Date(today);
+    date.setDate(date.getDate() + 1);
+    return date;
+  }, [today]);
+
+  // Filters
+  const thisWeekFilters = useMemo(
+    () => (teacherId ? { teacherId, dateFrom: startOfWeek } : undefined),
+    [teacherId, startOfWeek],
+  );
+
+  const upcomingFilters = useMemo(
     () => (teacherId ? { teacherId, dateFrom: today } : undefined),
     [teacherId, today],
   );
-  const courseFilters = useMemo(
-    () => (teacherId ? { teacherId, dateFrom: today } : undefined),
-    [teacherId, today],
+
+  const pagination = useMemo(() => ({ page: 1, pageSize: 20 }), []);
+
+  // Data fetching
+  const { data: revenue } = useTeacherRevenue(teacherId);
+  const { data: allBookingsData } = useBookings();
+
+  const { data: thisWeekCourses } = useCourses(thisWeekFilters, pagination);
+  const { data: thisWeekEvents } = useEvents(thisWeekFilters, pagination);
+
+  const { data: upcomingCourses, loading: loadingUpcoming } = useCourses(
+    upcomingFilters,
+    pagination,
   );
-  const eventFilters = useMemo(
-    () => (teacherId ? { teacherId, dateFrom: today } : undefined),
-    [teacherId, today],
-  );
-  const classPagination = useMemo(() => ({ page: 1, pageSize: 5 }), []);
+  const { data: upcomingEvents } = useEvents(upcomingFilters, pagination);
 
-  // Fetch revenue stats
-  const {
-    data: revenue,
-    loading: revenueLoading,
-    error: revenueError,
-  } = useTeacherRevenue(teacherId);
+  const allBookings = allBookingsData?.data || [];
 
-  // Fetch upcoming classes, courses, and events (only when we have a teacherId)
-  const {
-    data: classesData,
-    loading: classesLoading,
-    error: classesError,
-  } = useClasses(classFilters, classPagination);
-
-  const {
-    data: coursesData,
-    loading: coursesLoading,
-    error: coursesError,
-  } = useCourses(courseFilters, classPagination);
-
-  const {
-    data: eventsData,
-    loading: eventsLoading,
-    error: eventsError,
-  } = useEvents(eventFilters, classPagination);
-
-  // Combine upcoming items from all three sources
-  const upcomingItems = useMemo(() => {
-    const classes = (classesData?.data || []).map((item) => ({
-      type: "class" as const,
-      data: item,
-      date: new Date(item.date),
-    }));
-    const courses = (coursesData?.data || []).map((item) => ({
+  // Calculate upcoming classes grouped by date
+  const upcomingClassesGrouped = useMemo(() => {
+    const courses = (upcomingCourses?.data || []).map((item) => ({
       type: "course" as const,
       data: item,
       date: new Date(item.startDate),
     }));
-    const events = (eventsData?.data || []).map((item) => ({
+    const events = (upcomingEvents?.data || []).map((item) => ({
       type: "event" as const,
       data: item,
       date: new Date(item.date),
     }));
 
-    const combined = [...classes, ...courses, ...events];
-
-    // Sort by date
+    const combined = [...courses, ...events];
     combined.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    // Return max 5 items
-    return combined.slice(0, 5);
-  }, [classesData, coursesData, eventsData]);
+    const todayItems = combined.filter((item) => {
+      const itemDate = new Date(item.date);
+      itemDate.setHours(0, 0, 0, 0);
+      return itemDate.getTime() === today.getTime();
+    });
 
-  const upcomingLoading = classesLoading || coursesLoading || eventsLoading;
+    const tomorrowItems = combined.filter((item) => {
+      const itemDate = new Date(item.date);
+      itemDate.setHours(0, 0, 0, 0);
+      return itemDate.getTime() === tomorrow.getTime();
+    });
 
-  // Fetch all data for stats
-  const { data: allBookingsData, loading: loadingBookings } = useBookings();
-  const { data: allStudents, loading: loadingStudents } = useStudents();
-  const { data: allClasses, loading: loadingClasses } = useClasses();
-  const { data: allCourses, loading: loadingCourses } = useCourses();
-  const { data: allEvents, loading: loadingEvents } = useEvents();
+    const laterThisWeek = combined.filter((item) => {
+      const itemDate = new Date(item.date);
+      itemDate.setHours(0, 0, 0, 0);
+      return itemDate > tomorrow && itemDate <= endOfWeek;
+    });
 
-  const statsLoading =
-    loadingBookings ||
-    loadingStudents ||
-    loadingClasses ||
-    loadingCourses ||
-    loadingEvents;
+    const groups = [];
+    if (todayItems.length > 0)
+      groups.push({
+        label: "I dag",
+        items: todayItems,
+        color: "border-l-primary",
+      });
+    if (tomorrowItems.length > 0)
+      groups.push({
+        label: "I morgen",
+        items: tomorrowItems,
+        color: "border-l-primary/70",
+      });
+    if (laterThisWeek.length > 0)
+      groups.push({
+        label: "Senere denne uken",
+        items: laterThisWeek,
+        color: "border-l-primary/50",
+      });
 
-  const allBookings = allBookingsData?.data || [];
+    return groups;
+  }, [upcomingCourses, upcomingEvents, today, tomorrow, endOfWeek]);
 
-  // Calculate recent bookings (last 7 days)
-  const recentBookingsCount = useMemo(() => {
-    if (
-      !allBookings.length ||
-      !teacherId ||
-      !allClasses ||
-      !allCourses ||
-      !allEvents
-    )
-      return 0;
+  // Weekly stats
+  const weeklyStats = useMemo(() => {
+    const weekCourses = thisWeekCourses?.data || [];
+    const weekEvents = thisWeekEvents?.data || [];
 
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const totalClasses = weekCourses.length + weekEvents.length;
 
-    // Get all item IDs that belong to this teacher
-    const teacherItemIds = new Set([
-      ...allClasses.filter((c) => c.teacherId === teacherId).map((c) => c.id),
-      ...allCourses.filter((c) => c.teacherId === teacherId).map((c) => c.id),
-      ...allEvents.filter((e) => e.teacherId === teacherId).map((e) => e.id),
-    ]);
+    const totalEnrollments = [
+      ...weekCourses.map((c) => c.enrolledCount || 0),
+      ...weekEvents.map((e) => e.bookedCount || 0),
+    ].reduce((sum, count) => sum + count, 0);
 
-    // Count bookings from last 7 days for this teacher's items
-    return allBookings.filter((booking) => {
-      const bookingDate = new Date(booking.bookingDate);
-      return bookingDate >= sevenDaysAgo && teacherItemIds.has(booking.itemId);
-    }).length;
-  }, [allBookings, teacherId, allClasses, allCourses, allEvents]);
+    const weeklyRevenue = [
+      ...weekCourses.map((c) => (c.enrolledCount || 0) * c.price),
+      ...weekEvents.map((e) => (e.bookedCount || 0) * e.price),
+    ].reduce((sum, rev) => sum + rev, 0);
 
-  // Calculate total unique students
-  const totalStudentsCount = useMemo(() => {
-    if (
-      !allBookings.length ||
-      !teacherId ||
-      !allClasses ||
-      !allCourses ||
-      !allEvents
-    )
-      return 0;
-
-    // Get all item IDs that belong to this teacher
-    const teacherItemIds = new Set([
-      ...allClasses.filter((c) => c.teacherId === teacherId).map((c) => c.id),
-      ...allCourses.filter((c) => c.teacherId === teacherId).map((c) => c.id),
-      ...allEvents.filter((e) => e.teacherId === teacherId).map((e) => e.id),
-    ]);
-
-    // Get unique student IDs from bookings for this teacher's items
-    const uniqueStudentIds = new Set(
-      allBookings
-        .filter((booking) => teacherItemIds.has(booking.itemId))
-        .map((booking) => booking.studentId),
-    );
-
-    return uniqueStudentIds.size;
-  }, [allBookings, teacherId, allClasses, allCourses, allEvents]);
+    return { totalClasses, totalEnrollments, weeklyRevenue };
+  }, [thisWeekCourses, thisWeekEvents]);
 
   return (
     <TeacherLayout>
-      <div className="space-y-8">
-        {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground">
-            {t("teacher.welcome")}, {user?.name}
+      <div className="max-w-5xl space-y-6">
+        {/* Personal Greeting */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-medium text-foreground mb-2">
+            Hei, {user?.name?.split(" ")[0] || user?.name} 🌿
           </h1>
-          <p className="mt-2 text-muted-foreground">
-            {t("teacher.dashboard.title")}
+          <p className="text-base text-muted-foreground">
+            Her er hva som skjer i praksisen din denne uken.
           </p>
         </div>
 
-        {/* Error Display */}
-        {(revenueError || classesError) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Det oppstod en feil:</p>
-            {revenueError && (
-              <p className="text-sm mt-1">
-                Inntektsdata: {revenueError.message}
-              </p>
-            )}
-            {classesError && (
-              <p className="text-sm mt-1">Timer: {classesError.message}</p>
-            )}
-          </div>
-        )}
-
-        {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {/* Total Revenue */}
-          <div className="rounded-lg border border-border bg-white p-6 transition-shadow hover:shadow-md">
-            <div className="text-sm font-medium text-muted-foreground">
-              {t("teacher.dashboard.revenue")}
-            </div>
-            {revenueLoading ? (
-              <div className="mt-2 h-8 w-24 animate-pulse rounded bg-secondary"></div>
-            ) : revenueError ? (
-              <div className="mt-2 text-sm text-red-600">Feil ved lasting</div>
-            ) : (
-              <div className="mt-2 text-3xl font-semibold text-foreground">
-                {revenue?.paid.toLocaleString("nb-NO")} {CURRENCY}
+        {/* Weekly Overview */}
+        <div className="rounded-2xl bg-white border border-border shadow-sm px-6 py-5">
+          <div className="grid grid-cols-3 gap-6">
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5">
+                <CalendarDays className="h-5 w-5 text-primary" />
               </div>
-            )}
-            <div className="mt-1 text-xs text-muted-foreground">
-              {t("teacher.payment.pending")}:{" "}
-              {revenue?.pending.toLocaleString("nb-NO")} {CURRENCY}
-            </div>
-          </div>
-
-          {/* Upcoming Classes */}
-          <div className="rounded-lg border border-border bg-white p-6 transition-shadow hover:shadow-md">
-            <div className="text-sm font-medium text-muted-foreground">
-              {t("teacher.dashboard.upcomingClasses")}
-            </div>
-            {upcomingLoading ? (
-              <div className="mt-2 h-8 w-16 animate-pulse rounded bg-secondary"></div>
-            ) : (
-              <div className="mt-2 text-3xl font-semibold text-foreground">
-                {(classesData?.total || 0) +
-                  (coursesData?.total || 0) +
-                  (eventsData?.total || 0)}
-              </div>
-            )}
-            <div className="mt-1 text-xs text-muted-foreground">
-              Neste 30 dager
-            </div>
-          </div>
-
-          {/* Recent Bookings */}
-          <div className="rounded-lg border border-border bg-white p-6 transition-shadow hover:shadow-md">
-            <div className="text-sm font-medium text-muted-foreground">
-              {t("teacher.dashboard.recentBookings")}
-            </div>
-            {statsLoading ? (
-              <div className="mt-2 h-8 w-16 animate-pulse rounded bg-secondary"></div>
-            ) : (
-              <div className="mt-2 text-3xl font-semibold text-foreground">
-                {recentBookingsCount}
-              </div>
-            )}
-            <div className="mt-1 text-xs text-muted-foreground">
-              Siste 7 dager
-            </div>
-          </div>
-
-          {/* Total Students */}
-          <div className="rounded-lg border border-border bg-white p-6 transition-shadow hover:shadow-md">
-            <div className="text-sm font-medium text-muted-foreground">
-              {t("teacher.dashboard.totalStudents")}
-            </div>
-            {statsLoading ? (
-              <div className="mt-2 h-8 w-16 animate-pulse rounded bg-secondary"></div>
-            ) : (
-              <div className="mt-2 text-3xl font-semibold text-foreground">
-                {totalStudentsCount}
-              </div>
-            )}
-            <div className="mt-1 text-xs text-muted-foreground">
-              Aktive påmeldinger
-            </div>
-          </div>
-        </div>
-
-        {/* Upcoming Classes List */}
-        <div className="rounded-lg border border-border bg-white">
-          <div className="border-b border-border p-6">
-            <h2 className="text-lg font-semibold text-foreground">
-              {t("teacher.dashboard.upcomingClasses")}
-            </h2>
-          </div>
-
-          <div className="divide-y divide-border">
-            {upcomingLoading ? (
-              <div className="p-6">
-                <div className="space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-16 animate-pulse rounded bg-secondary"
-                    ></div>
-                  ))}
+              <div>
+                <div className="text-xs font-medium text-muted-foreground mb-0.5">
+                  Timer denne uken
+                </div>
+                <div className="text-2xl font-semibold text-foreground">
+                  {weeklyStats.totalClasses}
                 </div>
               </div>
-            ) : upcomingItems.length === 0 ? (
-              <div className="p-6 text-center text-muted-foreground">
-                Ingen kommende timer
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5">
+                <Users className="h-5 w-5 text-primary" />
               </div>
-            ) : (
-              upcomingItems.map((item) => {
-                const { type, data } = item;
-                const displayDate =
-                  type === "course" ? data.startDate : data.date;
-                const displayTime =
-                  type === "course" ? data.recurringTime : data.startTime;
-                const bookedCount =
-                  type === "course" ? data.enrolledCount : data.bookedCount;
+              <div>
+                <div className="text-xs font-medium text-muted-foreground mb-0.5">
+                  Påmeldinger
+                </div>
+                <div className="text-2xl font-semibold text-foreground">
+                  {weeklyStats.totalEnrollments}
+                </div>
+              </div>
+            </div>
 
-                const typeLabel =
-                  type === "class"
-                    ? "Enkeltkurs"
-                    : type === "course"
-                      ? "Kursrekke"
-                      : "Arrangement";
-
-                return (
-                  <div
-                    key={`${type}-${data.id}`}
-                    className="p-6 transition-colors hover:bg-secondary/50"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">{typeLabel}</Badge>
-                          <h3 className="font-medium text-foreground">
-                            {data.name}
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                          <span>{formatDisplayDate(displayDate)}</span>
-                          <span>kl. {displayTime}</span>
-                          <span>{data.location}</span>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-medium text-foreground">
-                          {bookedCount}/{data.capacity}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          påmeldte
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5">
+                <Banknote className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <div className="text-xs font-medium text-muted-foreground mb-0.5">
+                  Inntekter
+                </div>
+                <div className="text-2xl font-semibold text-foreground">
+                  {weeklyStats.weeklyRevenue.toLocaleString("nb-NO")} {CURRENCY}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <Link
-            to={ROUTES.TEACHER.CLASSES_CREATE}
-            className="rounded-lg border border-border bg-white p-6 text-left transition-all hover:shadow-md hover:bg-secondary/50 cursor-pointer"
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
+            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow-sm cursor-pointer"
           >
-            <div className="text-lg font-semibold text-foreground">
-              Opprett nytt enkeltkurs
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+                <Plus className="h-5 w-5 text-primary" />
+              </div>
+              <div className="text-sm font-semibold text-foreground">
+                Nytt kurs
+              </div>
             </div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              Legg til et enkeltkurs
-            </div>
-          </Link>
+            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
 
-          <Link
-            to={ROUTES.TEACHER.COURSES_CREATE}
-            className="rounded-lg border border-border bg-white p-6 text-left transition-all hover:shadow-md hover:bg-secondary/50 cursor-pointer"
+          <button
+            onClick={() => navigate(ROUTES.TEACHER.EVENTS_CREATE)}
+            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow cursor-pointer"
           >
-            <div className="text-lg font-semibold text-foreground">
-              Start ny kursrekke
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+                <CalendarPlus className="h-5 w-5 text-primary" />
+              </div>
+              <div className="text-sm font-semibold text-foreground">
+                Nytt arrangement
+              </div>
             </div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              Opprett en kursrekke
-            </div>
-          </Link>
+            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
 
-          <Link
-            to={ROUTES.TEACHER.STUDENTS}
-            className="rounded-lg border border-border bg-white p-6 text-left transition-all hover:shadow-md hover:bg-secondary/50 cursor-pointer"
+          <button
+            onClick={() => navigate(ROUTES.TEACHER.STUDENTS)}
+            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow cursor-pointer"
           >
-            <div className="text-lg font-semibold text-foreground">
-              Se påmeldinger
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+                <Users className="h-5 w-5 text-primary" />
+              </div>
+              <div className="text-sm font-semibold text-foreground">
+                Påmeldinger
+              </div>
             </div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              Administrer påmeldte
+            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+
+          <button
+            onClick={() => navigate(ROUTES.TEACHER.PAYMENTS)}
+            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
+                <TrendingUp className="h-5 w-5 text-primary" />
+              </div>
+              <div className="text-sm font-semibold text-foreground">
+                Betalinger
+              </div>
             </div>
-          </Link>
+            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+        </div>
+
+        {/* Dine neste timer */}
+        <div>
+          <h2 className="text-xl font-semibold text-foreground mb-4">
+            Dine neste timer
+          </h2>
+
+          {loadingUpcoming ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="h-20 animate-pulse rounded-xl bg-secondary"
+                ></div>
+              ))}
+            </div>
+          ) : upcomingClassesGrouped.length === 0 ? (
+            <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/30 px-4 py-3.5 shadow-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Ingen kommende timer
+              </span>
+              <Button
+                onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
+                size="sm"
+                variant="outline"
+                className="ml-auto cursor-pointer"
+              >
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                Opprett kurs
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {upcomingClassesGrouped.map((group) => (
+                <div key={group.label} className="space-y-2">
+                  <div className="text-xs font-bold text-foreground/70">
+                    {group.label}
+                  </div>
+
+                  <div className="space-y-2">
+                    {group.items.map((item) => {
+                      const { type, data } = item;
+                      const displayDate =
+                        type === "course" ? data.startDate : data.date;
+                      const displayTime =
+                        type === "course" ? data.recurringTime : data.startTime;
+                      const enrolled =
+                        type === "course"
+                          ? data.enrolledCount
+                          : data.bookedCount;
+                      const capacity = data.capacity;
+                      const percentage = Math.round(
+                        (enrolled / capacity) * 100,
+                      );
+
+                      return (
+                        <div
+                          key={`${type}-${data.id}`}
+                          className={`group relative pl-4 pr-5 py-4 rounded-2xl bg-white border-l-[3px] ${group.color} border-r border-t border-b border-border shadow-sm hover:shadow transition-all cursor-pointer`}
+                          onClick={() => {
+                            if (type === "course") {
+                              navigate(
+                                ROUTES.TEACHER.COURSES_EDIT.replace(
+                                  ":id",
+                                  data.id,
+                                ),
+                              );
+                            } else {
+                              navigate(
+                                ROUTES.TEACHER.EVENTS_EDIT.replace(
+                                  ":id",
+                                  data.id,
+                                ),
+                              );
+                            }
+                          }}
+                        >
+                          <div className="flex items-center justify-between gap-6">
+                            <div className="flex-1 space-y-1.5">
+                              <div className="flex items-center gap-2.5">
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs px-2 py-0.5"
+                                >
+                                  {type === "course" ? "Kurs" : "Arrangement"}
+                                </Badge>
+                                <h3 className="font-semibold text-foreground text-sm">
+                                  {data.name}
+                                </h3>
+                              </div>
+
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span>{formatDisplayDate(displayDate)}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  <span>kl. {displayTime}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  <span>{data.location}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-1.5 shrink-0">
+                              <div className="text-right">
+                                <div className="text-base font-semibold text-foreground">
+                                  {enrolled}/{capacity}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  påmeldte
+                                </div>
+                              </div>
+
+                              <div className="w-20 h-1.5 bg-muted/50 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full transition-all ${
+                                    percentage >= 90
+                                      ? "bg-primary"
+                                      : percentage >= 60
+                                        ? "bg-primary/70"
+                                        : "bg-primary/40"
+                                  }`}
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </TeacherLayout>

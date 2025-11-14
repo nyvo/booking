@@ -43,6 +43,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { TimePicker } from "@/components/ui/time-picker";
 import {
   Dialog,
   DialogContent,
@@ -77,7 +78,6 @@ const eventFormSchema = z.object({
   price: z.number().min(0, "Pris kan ikke være negativ"),
   location: z.string().min(2, "Lokasjon må være minst 2 tegn"),
   dropInAvailable: z.boolean().default(true),
-  tags: z.string().optional(),
 });
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
@@ -111,7 +111,6 @@ export default function EventEdit() {
       price: 200,
       location: "",
       dropInAvailable: true,
-      tags: "",
     },
   });
 
@@ -128,7 +127,6 @@ export default function EventEdit() {
         price: eventData.price,
         location: eventData.location,
         dropInAvailable: eventData.dropInAvailable,
-        tags: eventData.tags?.join(", ") || "",
       });
     }
   }, [eventData, form]);
@@ -147,14 +145,6 @@ export default function EventEdit() {
         return;
       }
 
-      // Parse tags
-      const tags = values.tags
-        ? values.tags
-            .split(",")
-            .map((tag) => tag.trim())
-            .filter(Boolean)
-        : undefined;
-
       await update(id, {
         name: values.name,
         description: values.description || undefined,
@@ -165,7 +155,6 @@ export default function EventEdit() {
         price: values.price,
         location: values.location,
         dropInAvailable: values.dropInAvailable,
-        tags,
       });
 
       // Navigate back to classes list on success
@@ -222,10 +211,10 @@ export default function EventEdit() {
               Feil ved lasting
             </h1>
           </div>
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Kunne ikke laste time</p>
-            <p className="text-sm mt-1">
-              {loadError?.message || "Timen ble ikke funnet"}
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
+            <p className="font-medium">Kunne ikke laste arrangement</p>
+            <p className="text-sm mt-1.5">
+              {loadError?.message || "Arrangementet ble ikke funnet"}
             </p>
           </div>
           <Button onClick={() => navigate(ROUTES.TEACHER.EVENTS)}>
@@ -282,14 +271,14 @@ export default function EventEdit() {
 
         {/* Error Display */}
         {(submitError || error) && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">
-            <p className="font-medium">Feil:</p>
-            <p className="text-sm mt-1">{submitError || error?.message}</p>
+          <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5 text-destructive/80">
+            <p className="font-medium">Noe gikk galt</p>
+            <p className="text-sm mt-1.5">{submitError || error?.message}</p>
           </div>
         )}
 
         {/* Form */}
-        <div className="rounded-lg border border-border bg-white p-6">
+        <div className="rounded-2xl border border-border bg-white p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Name */}
@@ -346,19 +335,18 @@ export default function EventEdit() {
                       <FormLabel>Dato *</FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant="outline"
-                              className="w-full justify-start text-left font-normal"
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {field.value ? (
-                                format(field.value, "dd.MM.yyyy")
-                              ) : (
-                                <span>Velg dato</span>
-                              )}
-                            </Button>
-                          </FormControl>
+                          <Button
+                            variant="outline"
+                            className="w-full h-10 justify-start text-left font-normal"
+                            type="button"
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? (
+                              format(field.value, "dd.MM.yyyy")
+                            ) : (
+                              <span>Velg dato</span>
+                            )}
+                          </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
@@ -385,7 +373,11 @@ export default function EventEdit() {
                     <FormItem>
                       <FormLabel>Starttid *</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <TimePicker
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Velg starttid"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -475,27 +467,6 @@ export default function EventEdit() {
                 )}
               />
 
-              {/* Tags */}
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="F.eks. Hatha, Nybegynner, Meditasjon"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Kommaseparerte tags (valgfritt)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Drop-in Available */}
               <FormField
                 control={form.control}
@@ -520,8 +491,8 @@ export default function EventEdit() {
 
               {/* Booking Info */}
               {eventData.bookedCount > 0 && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                  <p className="text-sm text-blue-800">
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+                  <p className="text-sm text-primary">
                     <strong>Info:</strong> {eventData.bookedCount}{" "}
                     {eventData.bookedCount === 1 ? "påmeldt" : "påmeldte"} på
                     dette arrangementet. Endringer i pris, dato eller tid blir
@@ -557,7 +528,7 @@ export default function EventEdit() {
                 Er du sikker på at du vil slette dette arrangementet? Dette kan
                 ikke angres.
                 {eventData.bookedCount > 0 && (
-                  <span className="block mt-2 font-medium text-red-600">
+                  <span className="block mt-2 font-medium text-destructive">
                     Advarsel: {eventData.bookedCount} påmeldte på dette
                     arrangementet!
                   </span>
