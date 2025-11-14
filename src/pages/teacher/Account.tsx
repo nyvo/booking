@@ -44,7 +44,11 @@ const profileFormSchema = z.object({
     .min(2, "Navn må være minst 2 tegn")
     .max(100, "Navn kan ikke være mer enn 100 tegn"),
   email: z.string().email("Ugyldig e-postadresse"),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .regex(/^[0-9\s]*$/, "Kun tall og mellomrom tillatt")
+    .optional()
+    .or(z.literal("")),
   bio: z.string().max(500, "Bio kan ikke være mer enn 500 tegn").optional(),
   specialties: z.string().optional(),
   website: z.string().url("Ugyldig URL").optional().or(z.literal("")),
@@ -68,7 +72,8 @@ export default function Account() {
   const { update, loading: profileLoading } = useTeacherMutations();
 
   const [activeSection, setActiveSection] = useState<ActiveSection>("profil");
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasProfileChanges, setHasProfileChanges] = useState(false);
+  const [hasSettingsChanges, setHasSettingsChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -100,14 +105,14 @@ export default function Account() {
     },
   });
 
-  // Track form changes
+  // Track form changes separately for each section
   useEffect(() => {
-    const subscription = profileForm.watch(() => setHasUnsavedChanges(true));
+    const subscription = profileForm.watch(() => setHasProfileChanges(true));
     return () => subscription.unsubscribe();
   }, [profileForm]);
 
   useEffect(() => {
-    const subscription = settingsForm.watch(() => setHasUnsavedChanges(true));
+    const subscription = settingsForm.watch(() => setHasSettingsChanges(true));
     return () => subscription.unsubscribe();
   }, [settingsForm]);
 
@@ -144,17 +149,15 @@ export default function Account() {
     return () => observer.disconnect();
   }, []);
 
-  // Unified save handler
-  const handleSaveAll = async () => {
+  // Save profile handler
+  const handleSaveProfile = async () => {
     try {
       setSaveSuccess(false);
       setSaveError(null);
 
-      // Validate both forms
-      const profileValues = await profileForm.trigger();
-      const settingsValues = await settingsForm.trigger();
-
-      if (!profileValues || !settingsValues) {
+      // Validate profile form
+      const isValid = await profileForm.trigger();
+      if (!isValid) {
         setSaveError("Vennligst sjekk alle feltene og prøv igjen.");
         return;
       }
@@ -166,7 +169,6 @@ export default function Account() {
 
       // Get form values
       const profile = profileForm.getValues();
-      const settings = settingsForm.getValues();
 
       // Save profile
       const specialties = profile.specialties
@@ -185,15 +187,41 @@ export default function Account() {
         website: profile.website || undefined,
       });
 
-      // Save settings (in a real app, this would call an API)
-      console.log("Settings saved:", settings);
-
-      setHasUnsavedChanges(false);
+      setHasProfileChanges(false);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       setSaveError(
-        err instanceof Error ? err.message : "Kunne ikke lagre endringer.",
+        err instanceof Error ? err.message : "Kunne ikke lagre profil.",
+      );
+    }
+  };
+
+  // Save settings handler
+  const handleSaveSettings = async () => {
+    try {
+      setSaveSuccess(false);
+      setSaveError(null);
+
+      // Validate settings form
+      const isValid = await settingsForm.trigger();
+      if (!isValid) {
+        setSaveError("Vennligst sjekk alle feltene og prøv igjen.");
+        return;
+      }
+
+      // Get form values
+      const settings = settingsForm.getValues();
+
+      // Save settings (in a real app, this would call an API)
+      console.log("Settings saved:", settings);
+
+      setHasSettingsChanges(false);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setSaveError(
+        err instanceof Error ? err.message : "Kunne ikke lagre innstillinger.",
       );
     }
   };
@@ -201,7 +229,7 @@ export default function Account() {
   // Warn on navigation with unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
+      if (hasProfileChanges || hasSettingsChanges) {
         e.preventDefault();
         e.returnValue = "";
       }
@@ -209,7 +237,7 @@ export default function Account() {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  }, [hasProfileChanges, hasSettingsChanges]);
 
   // Generate initials for avatar
   const getInitials = (name?: string) => {
@@ -312,7 +340,7 @@ export default function Account() {
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input className="pl-10" {...field} />
                               </div>
                             </FormControl>
@@ -331,7 +359,7 @@ export default function Account() {
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                   type="email"
                                   className="pl-10"
@@ -354,11 +382,11 @@ export default function Account() {
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                   type="tel"
                                   className="pl-10"
-                                  placeholder="+47 XXX XX XXX"
+                                  placeholder="XXX XX XXX"
                                   {...field}
                                 />
                               </div>
@@ -433,7 +461,7 @@ export default function Account() {
                             </FormLabel>
                             <FormControl>
                               <div className="relative">
-                                <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input
                                   type="url"
                                   className="pl-10"
@@ -455,8 +483,8 @@ export default function Account() {
                     <div className="flex justify-end pt-6 border-t border-border/40">
                       <Button
                         type="button"
-                        onClick={handleSaveAll}
-                        disabled={profileLoading || !hasUnsavedChanges}
+                        onClick={handleSaveProfile}
+                        disabled={profileLoading || !hasProfileChanges}
                         size="lg"
                       >
                         {profileLoading ? "Lagrer..." : "Lagre endringer"}
@@ -644,11 +672,11 @@ export default function Account() {
                     <div className="flex justify-end pt-6 border-t border-border/40">
                       <Button
                         type="button"
-                        onClick={handleSaveAll}
-                        disabled={profileLoading || !hasUnsavedChanges}
+                        onClick={handleSaveSettings}
+                        disabled={!hasSettingsChanges}
                         size="lg"
                       >
-                        {profileLoading ? "Lagrer..." : "Lagre endringer"}
+                        Lagre endringer
                       </Button>
                     </div>
                   </form>

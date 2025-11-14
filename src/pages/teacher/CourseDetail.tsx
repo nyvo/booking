@@ -229,19 +229,21 @@ export default function CourseDetail() {
               <h3 className="text-sm font-medium text-muted-foreground mb-2">
                 Tidspunkt
               </h3>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-sm text-foreground">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-foreground">
+                <div className="flex items-center gap-2">
                   <CalendarIcon className="h-4 w-4 text-primary/60" />
                   <span>Starter {formatDisplayDate(course.startDate)}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-foreground">
+                <span className="text-muted-foreground">·</span>
+                <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-primary/60" />
                   <span>
                     {WEEKDAY_NAMES[course.recurringDayOfWeek]} kl.{" "}
                     {course.recurringTime} ({course.duration} min)
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-foreground">
+                <span className="text-muted-foreground">·</span>
+                <div className="flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-primary/60" />
                   <span>{course.location}</span>
                 </div>

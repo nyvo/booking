@@ -8,8 +8,8 @@ import { generateSequentialId } from "@/utils/id";
 export const mockTeachers: Teacher[] = [
   {
     id: generateSequentialId("teacher", 1),
-    email: "kari.nordmann@yoga.no",
-    name: "Kari Nordmann",
+    email: "nyvo77@gmail.com",
+    name: "Kristoffer Nyvold",
     phone: "+47 900 12 345",
     role: "teacher",
     avatar: undefined,
