@@ -147,4 +147,20 @@
                 transparent 55%
             );
     }
+
+    /* Scandinavian fog-like gradient - very subtle */
+    .bg-scandi-gradient {
+        background:
+            radial-gradient(
+                circle at top left,
+                rgba(78, 149, 255, 0.06),
+                transparent 60%
+            ),
+            radial-gradient(
+                circle at bottom right,
+                rgba(165, 180, 252, 0.08),
+                transparent 60%
+            ),
+            #fafafa;
+    }
 }

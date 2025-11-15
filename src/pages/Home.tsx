@@ -1,10 +1,11 @@
 /**
- * Home page - redirects based on user role
+ * Home page - shows landing page or redirects based on user role
  */
 
-import { Navigate } from 'react-router-dom';
-import { useAuthContext } from '@/contexts/AuthContext';
-import { ROUTES } from '@/config/constants';
+import { Navigate } from "react-router-dom";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { ROUTES } from "@/config/constants";
+import Landing from "./Landing";
 
 export default function Home() {
   const { user, loading } = useAuthContext();
@@ -20,11 +21,13 @@ export default function Home() {
     );
   }
 
+  // Show landing page for unauthenticated users
   if (!user) {
-    return <Navigate to={ROUTES.TEACHER.DASHBOARD} replace />;
+    return <Landing />;
   }
 
-  if (user.role === 'student') {
+  // Redirect authenticated users to their respective dashboards
+  if (user.role === "student") {
     return <Navigate to={ROUTES.STUDENT.BROWSE} replace />;
   }
 

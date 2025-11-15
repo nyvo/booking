@@ -83,76 +83,118 @@ export default function TeacherEvents() {
           </Card>
         ) : (
           <div className="max-w-5xl space-y-4">
-            {data?.data.map((event) => (
-              <Card
-                key={event.id}
-                className="rounded-2xl border border-border bg-white shadow-sm px-6 py-5 cursor-pointer transition-all hover:bg-primary/5 hover:border-primary/30 hover:shadow"
-                onClick={() =>
-                  navigate(
-                    ROUTES.TEACHER.EVENTS_DETAIL.replace(":id", event.id),
-                  )
-                }
-              >
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="flex-1 min-w-0 space-y-2.5">
-                    <h3 className="text-lg font-semibold text-foreground leading-tight">
-                      {event.name}
-                    </h3>
+            {data?.data.map((event) => {
+              const fillPercentage = Math.round(
+                (event.bookedCount / event.capacity) * 100,
+              );
 
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <Calendar className="h-4 w-4 text-primary shrink-0" />
-                        <span>{formatDisplayDate(event.date)}</span>
-                        <span className="text-muted-foreground/40 mx-1">|</span>
-                        <Clock className="h-4 w-4 text-primary shrink-0" />
-                        <span>
-                          {event.startTime} ({event.duration} min)
-                        </span>
-                      </div>
+              return (
+                <Card
+                  key={event.id}
+                  className="rounded-3xl border border-border/60 bg-white/80 shadow-sm backdrop-blur cursor-pointer transition-all hover:bg-primary/5 hover:border-primary/30 hover:shadow"
+                  onClick={() =>
+                    navigate(
+                      ROUTES.TEACHER.EVENTS_DETAIL.replace(":id", event.id),
+                    )
+                  }
+                >
+                  <div className="flex flex-col md:flex-row gap-8 p-8">
+                    {/* Left Side: Event Identity & Session Details (60%) */}
+                    <div className="flex-1 md:max-w-[60%] space-y-4">
+                      {/* Event Name */}
+                      <h3 className="text-xl font-semibold text-foreground leading-tight">
+                        {event.name}
+                      </h3>
 
-                      <div className="flex items-center gap-2 text-sm text-foreground">
-                        <MapPin className="h-4 w-4 text-primary shrink-0" />
-                        <span>
+                      {/* Metadata Chips */}
+                      <div className="flex flex-wrap gap-2">
+                        <span className="rounded-full bg-accent/20 px-3 py-1 text-xs font-medium text-foreground">
                           {event.location}
-                          {event.dropInAvailable && " • Drop-in tilgjengelig"}
                         </span>
-                      </div>
-                    </div>
-
-                    {event.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed max-w-lg">
-                        {event.description}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col items-start md:items-end shrink-0 md:w-[130px]">
-                    <div className="flex md:flex-col gap-6 md:gap-2.5 w-full">
-                      <div className="flex-1 md:flex-none text-left md:text-right">
-                        <div className="text-xl font-semibold text-foreground leading-none">
-                          {event.bookedCount}
-                          <span className="text-base text-muted-foreground font-normal">
-                            /{event.capacity}
+                        <span className="rounded-full bg-accent/20 px-3 py-1 text-xs font-medium text-foreground">
+                          {event.duration} min
+                        </span>
+                        {event.dropInAvailable && (
+                          <span className="rounded-full bg-accent/20 px-3 py-1 text-xs font-medium text-foreground">
+                            Drop-in
                           </span>
+                        )}
+                      </div>
+
+                      {/* Session Details */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <Calendar className="h-4 w-4 text-primary shrink-0" />
+                          <span>{formatDisplayDate(event.date)}</span>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          påmeldte
+
+                        <div className="flex items-center gap-2 text-sm text-foreground">
+                          <Clock className="h-4 w-4 text-primary shrink-0" />
+                          <span>Kl. {event.startTime}</span>
                         </div>
                       </div>
 
-                      <div className="flex-1 md:flex-none text-left md:text-right">
-                        <div className="text-xl font-semibold text-foreground leading-none">
-                          {event.price}
+                      {/* Description */}
+                      {event.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed pt-2">
+                          {event.description}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Right Side: Stats & Action (40%) */}
+                    <div className="flex flex-col items-start md:items-end justify-between gap-6 md:min-w-[40%]">
+                      {/* Big Stats */}
+                      <div className="flex md:flex-col gap-8 md:gap-4 w-full md:items-end">
+                        {/* Booked Count - Large & Prominent */}
+                        <div className="text-left md:text-right">
+                          <div className="text-4xl font-semibold text-foreground leading-none">
+                            {event.bookedCount}
+                            <span className="text-2xl text-muted-foreground font-normal">
+                              /{event.capacity}
+                            </span>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">
+                            Påmeldte
+                          </div>
+                          {/* Soft Pill Progress Indicator */}
+                          <div className="mt-3">
+                            <span className="inline-block rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+                              {fillPercentage}% fylt
+                            </span>
+                          </div>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {CURRENCY}
+
+                        {/* Price - Large & Prominent */}
+                        <div className="text-left md:text-right">
+                          <div className="text-4xl font-semibold text-foreground leading-none">
+                            {event.price}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">
+                            {CURRENCY}
+                          </div>
                         </div>
                       </div>
+
+                      {/* Edit Button */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-full px-6 self-stretch md:self-end"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(
+                            ROUTES.TEACHER.EVENTS_EDIT.replace(":id", event.id),
+                          );
+                        }}
+                      >
+                        Rediger
+                      </Button>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>
