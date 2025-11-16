@@ -153,7 +153,7 @@ export default function EventCreate() {
 
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-semibold text-foreground">
+          <h1 className="text-3xl font-normal text-foreground">
             Opprett nytt arrangement
           </h1>
           <p className="mt-2 text-muted-foreground">

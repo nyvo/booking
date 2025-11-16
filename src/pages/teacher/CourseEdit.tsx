@@ -218,7 +218,7 @@ export default function CourseEdit() {
       <TeacherLayout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">
+            <h1 className="text-3xl font-normal text-foreground">
               Feil ved lasting
             </h1>
           </div>
@@ -263,7 +263,7 @@ export default function CourseEdit() {
         {/* Page Header */}
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">
+            <h1 className="text-3xl font-normal text-foreground">
               Rediger kurs
             </h1>
             <p className="mt-2 text-muted-foreground">

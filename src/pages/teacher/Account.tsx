@@ -254,7 +254,7 @@ export default function Account() {
       <div className="mx-auto max-w-3xl px-4 space-y-6">
         {/* Page Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-semibold text-foreground">Konto</h1>
+          <h1 className="text-4xl font-normal text-foreground">Konto</h1>
           <p className="text-base text-muted-foreground">
             Administrer profil og varslinger
           </p>

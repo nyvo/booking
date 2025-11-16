@@ -75,7 +75,7 @@ export default function Profile() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">
+            <h1 className="text-3xl font-normal text-foreground">
               Min profil
             </h1>
             <p className="mt-2 text-muted-foreground">

@@ -81,7 +81,7 @@ export default function Students() {
       <div className="space-y-6">
         {/* Page Header */}
         <div className="space-y-2">
-          <h1 className="text-4xl font-semibold text-foreground">
+          <h1 className="text-4xl font-normal text-foreground">
             Påmeldinger
           </h1>
           <p className="text-muted-foreground">

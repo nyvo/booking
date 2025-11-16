@@ -145,7 +145,7 @@ export default function CourseDetail() {
               )}
             </div>
 
-            <h1 className="text-4xl font-semibold text-foreground">
+            <h1 className="text-4xl font-normal text-foreground">
               {courseData.name}
             </h1>
           </div>
@@ -227,7 +227,7 @@ export default function CourseDetail() {
                   <p className="text-sm text-muted-foreground">
                     Pris for hele kursrekken
                   </p>
-                  <p className="text-3xl font-semibold text-foreground">
+                  <p className="text-3xl font-normal text-foreground">
                     {formatCurrency(courseData.price)}
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">

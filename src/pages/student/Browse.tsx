@@ -117,7 +117,7 @@ export default function Browse() {
       <div className="space-y-6">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-semibold text-foreground">
+          <h1 className="text-3xl font-normal text-foreground">
             Utforsk yogatimer
           </h1>
           <p className="mt-2 text-muted-foreground">

@@ -147,7 +147,7 @@ export default function StudentDetail() {
       <TeacherLayout>
         <div className="space-y-6">
           <div className="space-y-2">
-            <h1 className="text-4xl font-semibold text-foreground">
+            <h1 className="text-4xl font-normal text-foreground">
               Feil ved lasting
             </h1>
           </div>
@@ -202,7 +202,7 @@ export default function StudentDetail() {
 
         {/* Student Header */}
         <Card className="p-8">
-          <h1 className="text-4xl font-semibold text-foreground mb-6">
+          <h1 className="text-4xl font-normal text-foreground mb-6">
             {student.name}
           </h1>
 

@@ -135,7 +135,7 @@ export default function EventDetail() {
               )}
             </div>
 
-            <h1 className="text-4xl font-semibold text-foreground">
+            <h1 className="text-4xl font-normal text-foreground">
               {eventData.name}
             </h1>
           </div>
@@ -204,7 +204,7 @@ export default function EventDetail() {
               <div className="space-y-3">
                 <div>
                   <p className="text-sm text-muted-foreground">Pris</p>
-                  <p className="text-3xl font-semibold text-foreground">
+                  <p className="text-3xl font-normal text-foreground">
                     {formatCurrency(eventData.price)}
                   </p>
                 </div>

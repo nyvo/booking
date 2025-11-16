@@ -180,7 +180,7 @@ export default function Bookings() {
       <div className="space-y-6 pb-20 md:pb-0">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-semibold text-foreground">
+          <h1 className="text-3xl font-normal text-foreground">
             Mine bookinger
           </h1>
           <p className="mt-2 text-muted-foreground">

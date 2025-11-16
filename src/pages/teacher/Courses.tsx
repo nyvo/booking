@@ -46,7 +46,7 @@ export default function TeacherCourses() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">
+            <h1 className="text-3xl font-normal text-foreground">
               {t("nav.courses")}
             </h1>
             <p className="mt-2 text-muted-foreground">
@@ -159,7 +159,7 @@ export default function TeacherCourses() {
                       <div className="flex md:flex-col gap-8 md:gap-4 w-full md:items-end">
                         {/* Enrolled Count - Large & Prominent */}
                         <div className="text-left md:text-right">
-                          <div className="text-4xl font-semibold text-foreground leading-none">
+                          <div className="text-4xl font-normal text-foreground leading-none">
                             {course.enrolledCount}
                             <span className="text-2xl text-muted-foreground font-normal">
                               /{course.capacity}
@@ -178,7 +178,7 @@ export default function TeacherCourses() {
 
                         {/* Price - Large & Prominent */}
                         <div className="text-left md:text-right">
-                          <div className="text-4xl font-semibold text-foreground leading-none">
+                          <div className="text-4xl font-normal text-foreground leading-none">
                             {course.price}
                           </div>
                           <div className="text-xs text-muted-foreground mt-2 uppercase tracking-wide">

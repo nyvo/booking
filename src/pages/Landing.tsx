@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import PricingSection from "@/components/PricingSection";
 
 export default function Landing() {
   return (
@@ -440,19 +441,19 @@ export default function Landing() {
             <div className="border-b border-border/15 px-6 py-8">
               <div className="grid grid-cols-2 gap-12 md:grid-cols-3">
                 <div>
-                  <p className="text-4xl font-semibold text-foreground">12</p>
+                  <p className="text-4xl font-normal text-foreground">12</p>
                   <p className="mt-2 text-base text-muted-foreground">
                     Aktive kurs
                   </p>
                 </div>
                 <div>
-                  <p className="text-4xl font-semibold text-foreground">47</p>
+                  <p className="text-4xl font-normal text-foreground">47</p>
                   <p className="mt-2 text-base text-muted-foreground">
                     Aktive elever
                   </p>
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <p className="text-4xl font-semibold text-foreground">8</p>
+                  <p className="text-4xl font-normal text-foreground">8</p>
                   <p className="mt-2 text-base text-muted-foreground">
                     Timer denne uken
                   </p>
@@ -592,40 +593,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Pricing Section - Alternating bg (white) with card */}
-      <section className="bg-white">
-        <div className="mx-auto max-w-5xl px-6 py-28 md:px-8">
-          <div className="mb-12 space-y-6">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
-              Prising
-            </p>
-            <h2 className="text-5xl font-semibold leading-tight text-foreground md:text-6xl">
-              Enkel prising
-            </h2>
-          </div>
-
-          <div className="rounded-xl border border-border/15 bg-white px-8 py-10">
-            <div className="space-y-8">
-              <p className="max-w-[580px] text-xl leading-[1.7] text-muted-foreground">
-                Start gratis – betal kun når du er klar for flere funksjoner og
-                ubegrensede bookinger.
-              </p>
-              <div className="flex gap-4">
-                <Button size="lg" className="rounded-full px-10 text-base">
-                  Se priser
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full px-10 text-base"
-                >
-                  Kontakt oss
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Pricing Section */}
+      <PricingSection />
 
       {/* Footer */}
       <footer className="border-t border-border/20 bg-slate-50">

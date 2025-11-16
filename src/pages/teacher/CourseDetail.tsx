@@ -173,7 +173,7 @@ export default function CourseDetail() {
         {/* Header with actions */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold text-foreground">
+            <h1 className="text-3xl font-normal text-foreground">
               {course.name}
             </h1>
           </div>

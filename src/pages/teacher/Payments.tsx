@@ -231,7 +231,7 @@ export default function Payments() {
     <TeacherLayout>
       {/* Page Header */}
       <div className="mx-auto max-w-4xl px-4 space-y-2 mb-8">
-        <h1 className="text-4xl font-semibold text-foreground">Betalinger</h1>
+        <h1 className="text-4xl font-normal text-foreground">Betalinger</h1>
         <p className="text-base text-muted-foreground">
           Oversikt over inntekter og betalingshistorikk
         </p>
