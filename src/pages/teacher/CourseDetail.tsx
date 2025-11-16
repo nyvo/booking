@@ -200,7 +200,7 @@ export default function CourseDetail() {
         </div>
 
         {/* Course Details Card */}
-        <Card className="rounded-2xl border border-border/60 bg-white shadow-sm">
+        <Card className="rounded-2xl border border-border/60 bg-background-surface shadow-md">
           <div className="px-8 py-6">
             {/* Small label pill */}
             <div className="mb-6">
@@ -312,7 +312,7 @@ export default function CourseDetail() {
 
         {/* Week-by-week overview */}
         {course.sessions && course.sessions.length > 0 && (
-          <Card className="rounded-2xl border border-border/60 bg-white shadow-sm">
+          <Card className="rounded-2xl border border-border/60 bg-background-surface shadow-md">
             <div className="px-8 py-6">
               <div className="mb-2">
                 <h2 className="text-lg font-semibold text-foreground">
@@ -327,7 +327,7 @@ export default function CourseDetail() {
                 {course.sessions.map((session) => (
                   <div
                     key={session.id}
-                    className="rounded-2xl border border-border/60 bg-white/70 shadow-sm px-4 py-3 cursor-pointer transition-all hover:bg-primary/5 hover:border-primary/30"
+                    className="rounded-2xl border border-border/60 bg-background-surface/70 shadow-md px-4 py-3 cursor-pointer transition-all hover:bg-primary/5 hover:border-primary/30"
                     onClick={() => handleEditSession(session)}
                   >
                     <div className="flex items-start justify-between mb-2">

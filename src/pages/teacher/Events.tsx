@@ -91,7 +91,7 @@ export default function TeacherEvents() {
               return (
                 <Card
                   key={event.id}
-                  className="rounded-3xl border border-border/60 bg-white/80 shadow-sm backdrop-blur cursor-pointer transition-all hover:bg-primary/5 hover:border-primary/30 hover:shadow"
+                  className="rounded-3xl border border-border/60 bg-background-surface/80 shadow-md backdrop-blur cursor-pointer transition-all hover:bg-primary/5 hover:border-primary/30 hover:shadow"
                   onClick={() =>
                     navigate(
                       ROUTES.TEACHER.EVENTS_DETAIL.replace(":id", event.id),

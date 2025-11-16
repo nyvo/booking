@@ -6,6 +6,11 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 // Home page
 import Home from "@/pages/Home";
 
+// Auth pages
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+
 // Teacher pages
 import TeacherDashboard from "@/pages/teacher/Dashboard";
 import TeacherCourses from "@/pages/teacher/Courses";
@@ -34,6 +39,14 @@ function App() {
         <Routes>
           {/* Root - redirects based on user role */}
           <Route path="/" element={<Home />} />
+
+          {/* Auth routes - Public */}
+          <Route path={ROUTES.AUTH.LOGIN} element={<Login />} />
+          <Route path={ROUTES.AUTH.REGISTER} element={<Register />} />
+          <Route
+            path={ROUTES.AUTH.FORGOT_PASSWORD}
+            element={<ForgotPassword />}
+          />
 
           {/* Teacher routes - Protected */}
           <Route

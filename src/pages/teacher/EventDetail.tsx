@@ -153,7 +153,7 @@ export default function EventDetail() {
         </div>
 
         {/* Event Details Card */}
-        <Card className="rounded-2xl border border-border/60 bg-white shadow-sm">
+        <Card className="rounded-2xl border border-border/60 bg-background-surface shadow-md">
           <div className="px-8 py-6 space-y-8">
             {/* Small label */}
             <div>

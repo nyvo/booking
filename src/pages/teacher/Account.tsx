@@ -269,7 +269,7 @@ export default function Account() {
               ${
                 activeSection === "profil"
                   ? "bg-primary text-white"
-                  : "bg-white/60 text-muted-foreground hover:bg-white hover:text-foreground border border-border/40"
+                  : "bg-background-surface/60 text-muted-foreground hover:bg-background-surface hover:text-foreground border border-border/40"
               }
             `}
           >
@@ -282,7 +282,7 @@ export default function Account() {
               ${
                 activeSection === "varsler"
                   ? "bg-primary text-white"
-                  : "bg-white/60 text-muted-foreground hover:bg-white hover:text-foreground border border-border/40"
+                  : "bg-background-surface/60 text-muted-foreground hover:bg-background-surface hover:text-foreground border border-border/40"
               }
             `}
           >
@@ -294,7 +294,7 @@ export default function Account() {
         <div className="space-y-6">
           {/* === PROFIL CARD === */}
           <div ref={profilRef}>
-            <Card className="rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur overflow-hidden h-fit">
+            <Card className="rounded-3xl border border-border/60 shadow-md bg-background-surface/80 backdrop-blur overflow-hidden h-fit">
               {/* Card Header */}
               <div className="px-6 py-5 border-b border-border/60">
                 <h2 className="text-xl font-semibold text-foreground">
@@ -498,7 +498,7 @@ export default function Account() {
 
           {/* === VARSLER CARD === */}
           <div ref={varslerRef}>
-            <Card className="rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur overflow-hidden h-fit">
+            <Card className="rounded-3xl border border-border/60 shadow-md bg-background-surface/80 backdrop-blur overflow-hidden h-fit">
               {/* Card Header */}
               <div className="px-6 py-5 border-b border-border/60">
                 <h2 className="text-xl font-semibold text-foreground">

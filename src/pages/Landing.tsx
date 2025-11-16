@@ -4,6 +4,7 @@
  * Favrit-inspired Scandinavian sharpness with Cluely calm aesthetic
  */
 
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,8 +14,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import PricingSection from "@/components/PricingSection";
+import { ROUTES } from "@/config/constants";
 
 export default function Landing() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-white">
       {/* Header + Hero - Extended gradient */}
@@ -29,6 +32,7 @@ export default function Landing() {
               variant="outline"
               size="lg"
               className="rounded-full font-semibold px-6"
+              onClick={() => navigate(ROUTES.AUTH.LOGIN)}
             >
               Logg inn
             </Button>
@@ -48,13 +52,18 @@ export default function Landing() {
                 </p>
               </div>
               <div className="flex gap-4">
-                <Button size="lg" className="rounded-full px-8 text-base">
+                <Button
+                  size="lg"
+                  className="rounded-full px-8 text-base"
+                  onClick={() => navigate(ROUTES.AUTH.REGISTER)}
+                >
                   Start gratis
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
                   className="rounded-full px-8 text-base"
+                  onClick={() => navigate(ROUTES.AUTH.LOGIN)}
                 >
                   Se hvordan det fungerer
                 </Button>

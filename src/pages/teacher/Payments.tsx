@@ -241,9 +241,9 @@ export default function Payments() {
       <div className="mx-auto max-w-4xl px-4 space-y-8">
         {/* Single Summary Card with Integrated Stats */}
         {loading ? (
-          <Card className="h-56 animate-pulse rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur" />
+          <Card className="h-56 animate-pulse rounded-3xl border border-border/60 shadow-md bg-background-surface/80 backdrop-blur" />
         ) : (
-          <Card className="rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur overflow-hidden">
+          <Card className="rounded-3xl border border-border/60 shadow-md bg-background-surface/80 backdrop-blur overflow-hidden">
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
@@ -357,7 +357,7 @@ export default function Payments() {
         )}
 
         {/* Payments History Card - Directly Below */}
-        <Card className="rounded-3xl border border-border/60 shadow-sm bg-white/80 backdrop-blur overflow-hidden">
+        <Card className="rounded-3xl border border-border/60 shadow-md bg-background-surface/80 backdrop-blur overflow-hidden">
           {/* Header */}
           <div className="px-8 py-6 border-b border-border/60">
             <h2 className="text-2xl font-semibold text-foreground">
@@ -384,7 +384,7 @@ export default function Payments() {
                     ${
                       statusFilter === filter.value
                         ? "bg-primary text-white"
-                        : "bg-white/60 text-muted-foreground hover:bg-white hover:text-foreground border border-border/40"
+                        : "bg-background-surface/60 text-muted-foreground hover:bg-background-surface hover:text-foreground border border-border/40"
                     }
                   `}
                 >

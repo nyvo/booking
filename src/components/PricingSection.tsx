@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { motion, AnimatePresence } from "framer-motion";
 
 type BillingPeriod = "monthly" | "yearly";
 
@@ -34,7 +35,7 @@ const pricingTiers: PricingTier[] = [
     description: "Perfekt for å komme i gang",
     monthlyPrice: 0,
     yearlyPrice: 0,
-    platformFee: "10% per booking",
+    platformFee: "10 % per booking",
     features: [
       "Ubegrensede timer",
       "Online betalinger",
@@ -49,7 +50,7 @@ const pricingTiers: PricingTier[] = [
     description: "For aktive lærere",
     monthlyPrice: 199,
     yearlyPrice: 1990,
-    platformFee: "5% per booking",
+    platformFee: "5 % per booking",
     features: [
       "Alt i Gratis",
       "Analysedashboard",
@@ -62,14 +63,14 @@ const pricingTiers: PricingTier[] = [
   {
     id: "pro",
     name: "Pro",
-    description: "For studioer og travle timeplan",
+    description: "For studioer og travle timeplaner",
     monthlyPrice: 499,
     yearlyPrice: 4990,
-    platformFee: "2% per booking",
+    platformFee: "2 % per booking",
     features: [
       "Alt i Vekst",
       "Avansert analyse",
-      "Topp prioritet synlighet",
+      "Topp prioritert synlighet",
       "Fremhevet plassering",
       "Dedikert støtte",
     ],
@@ -106,28 +107,52 @@ export default function PricingSection() {
           </div>
 
           {/* Billing Toggle - Inside container with smooth animation */}
-          <div className="inline-flex items-center rounded-full bg-white border border-border p-1 shadow-sm">
+          <div className="inline-flex items-center rounded-full bg-white border border-border p-1 shadow-sm relative">
             <button
               onClick={() => setBillingPeriod("monthly")}
-              className={`relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer ${
+              className={`relative rounded-full px-6 py-2.5 text-sm font-medium transition-colors duration-200 cursor-pointer ${
                 billingPeriod === "monthly"
-                  ? "bg-primary text-white shadow-sm"
+                  ? "text-white"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Månedlig
+              {billingPeriod === "monthly" && (
+                <motion.div
+                  layoutId="billing-pill"
+                  className="absolute inset-0 bg-primary rounded-full shadow-sm"
+                  initial={false}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                  }}
+                />
+              )}
+              <span className="relative z-10">Månedlig</span>
             </button>
             <button
               onClick={() => setBillingPeriod("yearly")}
-              className={`relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-300 cursor-pointer flex items-center gap-2 ${
+              className={`relative rounded-full px-6 py-2.5 text-sm font-medium transition-colors duration-200 cursor-pointer flex items-center gap-2 ${
                 billingPeriod === "yearly"
-                  ? "bg-primary text-white shadow-sm"
+                  ? "text-white"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Årlig
+              {billingPeriod === "yearly" && (
+                <motion.div
+                  layoutId="billing-pill"
+                  className="absolute inset-0 bg-primary rounded-full shadow-sm"
+                  initial={false}
+                  transition={{
+                    type: "spring",
+                    stiffness: 400,
+                    damping: 30,
+                  }}
+                />
+              )}
+              <span className="relative z-10">Årlig</span>
               <span
-                className={`rounded-full bg-primary/10 px-2 py-0.5 text-xs transition-all duration-300 ${
+                className={`relative z-10 rounded-full bg-primary/10 px-2 py-0.5 text-xs transition-all duration-200 ${
                   billingPeriod === "yearly"
                     ? "bg-white/20 text-white opacity-100"
                     : "text-primary opacity-70"
@@ -173,12 +198,29 @@ export default function PricingSection() {
                 {/* Price - Fixed height */}
                 <div className="space-y-1 h-20">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-medium text-foreground transition-all duration-300">
-                      {formatPrice(tier)}
-                    </span>
+                    {tier.monthlyPrice === 0 ? (
+                      // Free tier - no animation
+                      <span className="text-5xl font-medium text-foreground">
+                        {formatPrice(tier)}
+                      </span>
+                    ) : (
+                      // Paid tiers - animate price changes
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={billingPeriod}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="text-5xl font-medium text-foreground"
+                        >
+                          {formatPrice(tier)}
+                        </motion.span>
+                      </AnimatePresence>
+                    )}
                     <span className="text-base text-muted-foreground">NOK</span>
                   </div>
-                  <p className="text-sm text-muted-foreground transition-all duration-300">
+                  <p className="text-sm text-muted-foreground">
                     {getBillingLabel(tier)}
                   </p>
                 </div>
