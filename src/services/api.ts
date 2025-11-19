@@ -3,11 +3,7 @@
  * Simulates API calls with delays to mimic real network requests
  */
 
-import type {
-  PaginatedResponse,
-  PaginationParams,
-  FilterOptions,
-} from "@/types";
+import type { PaginatedResponse, PaginationParams } from "@/types";
 
 /**
  * Simulate network delay
@@ -78,11 +74,11 @@ export const mockApiCall = async <T>(
  * Mock API error
  */
 export class MockApiError extends Error {
-  constructor(
-    message: string,
-    public statusCode: number = 500,
-  ) {
+  public statusCode: number;
+
+  constructor(message: string, statusCode: number = 500) {
     super(message);
     this.name = "MockApiError";
+    this.statusCode = statusCode;
   }
 }

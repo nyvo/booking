@@ -46,10 +46,10 @@ export default function Profile() {
       name: user?.name || "",
       email: user?.email || "",
       phone: user?.phone || "",
-      emergencyContactName: user?.emergencyContact?.name || "",
-      emergencyContactRelation: user?.emergencyContact?.relation || "",
-      emergencyContactPhone: user?.emergencyContact?.phone || "",
-      medicalNotes: user?.medicalNotes || "",
+      emergencyContactName: (user as any)?.emergencyContact?.name || "",
+      emergencyContactRelation: (user as any)?.emergencyContact?.relation || "",
+      emergencyContactPhone: (user as any)?.emergencyContact?.phone || "",
+      medicalNotes: (user as any)?.medicalNotes || "",
     },
   });
 
@@ -75,9 +75,7 @@ export default function Profile() {
         {/* Page Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-normal text-foreground">
-              Min profil
-            </h1>
+            <h1 className="text-3xl font-normal text-foreground">Min profil</h1>
             <p className="mt-2 text-muted-foreground">
               Administrer din personlige informasjon
             </p>

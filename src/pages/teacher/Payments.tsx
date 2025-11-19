@@ -9,11 +9,7 @@ import { Banknote, RotateCcw, Clock, CheckCircle } from "lucide-react";
 
 import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  useTeacherPayments,
-  useTeacherRevenue,
-  useBookings,
-} from "@/hooks/useBookings";
+import { useTeacherPayments, useBookings } from "@/hooks/useBookings";
 import { useCourses, useEvents } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useAuth";
 import { formatDate, formatCurrency } from "@/utils/date";
@@ -52,9 +48,6 @@ export default function Payments() {
     "all",
   );
 
-  const { data: revenueData, loading: loadingRevenue } = useTeacherRevenue(
-    user?.id,
-  );
   const { data: paymentsData, loading: loadingPayments } = useTeacherPayments(
     user?.id,
   );
@@ -79,10 +72,10 @@ export default function Payments() {
       let itemName = "Ukjent";
       if (booking) {
         if (booking.itemType === "course") {
-          const course = courses.find((c) => c.id === booking.itemId);
+          const course = courses?.data?.find((c) => c.id === booking.itemId);
           itemName = course?.name || "Ukjent kurs";
         } else if (booking.itemType === "event") {
-          const event = events.find((e) => e.id === booking.itemId);
+          const event = events?.data?.find((e) => e.id === booking.itemId);
           itemName = event?.name || "Ukjent event";
         }
       }
@@ -199,7 +192,7 @@ export default function Payments() {
     // Failed/overdue payments take priority
     if (overdue > 0 && pending > 0) {
       return {
-        message: `${pending} ${pending === 1 ? "ventende" : "ventende"} · ${overdue} ${overdue === 1 ? "krever oppmerksomhet" : "krever oppmerksomhet"}`,
+        message: `${pending} ${pending === 1 ? "ventende" : "ventende"} | ${overdue} ${overdue === 1 ? "krever oppmerksomhet" : "krever oppmerksomhet"}`,
         color: "text-destructive",
       };
     }
@@ -225,7 +218,7 @@ export default function Payments() {
     };
   }, [paymentCounts]);
 
-  const loading = loadingRevenue || loadingPayments;
+  const loading = loadingPayments;
 
   return (
     <TeacherLayout>

@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import StudentLayout from "@/components/layout/StudentLayout";
 import { useCourses, useEvents } from "@/hooks/useClasses";
-import { formatDate, formatTime, formatCurrency } from "@/utils/date";
+import { formatDate, formatCurrency } from "@/utils/date";
 import { ROUTES } from "@/config/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,11 +105,6 @@ export default function Browse() {
   const getTypeLabel = (type: string) => {
     if (type === "course") return "Kurs";
     return "Arrangement";
-  };
-
-  const getTypeBadgeColor = (type: string) => {
-    if (type === "course") return "bg-accent/10 text-accent";
-    return "bg-primary/10 text-primary";
   };
 
   return (

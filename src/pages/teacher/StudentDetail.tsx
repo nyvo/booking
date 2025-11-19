@@ -13,7 +13,6 @@ import {
   Calendar,
   Clock,
   MapPin,
-  DollarSign,
 } from "lucide-react";
 
 import TeacherLayout from "@/components/layout/TeacherLayout";
@@ -32,8 +31,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { formatDate, formatTime, formatCurrency } from "@/utils/date";
-import type { Booking, BookingStatus, Payment } from "@/types";
+import { formatDate, formatCurrency } from "@/utils/date";
+import type { BookingStatus } from "@/types";
 import { mockPayments } from "@/mock-data/bookings";
 
 const STATUS_LABELS: Record<BookingStatus, string> = {
@@ -41,13 +40,6 @@ const STATUS_LABELS: Record<BookingStatus, string> = {
   pending: "Venter",
   cancelled: "Kansellert",
   completed: "Fullført",
-};
-
-const STATUS_COLORS: Record<BookingStatus, string> = {
-  confirmed: "bg-primary/10 text-primary",
-  pending: "bg-accent/10 text-accent",
-  cancelled: "bg-muted/10 text-muted-foreground",
-  completed: "bg-primary/5 text-primary/80",
 };
 
 export default function StudentDetail() {
@@ -60,13 +52,12 @@ export default function StudentDetail() {
     error: studentError,
   } = useStudent(id);
   const { data: bookings, loading: loadingBookings } = useStudentBookings(id);
-  const { data: classes } = useClasses();
   const { data: courses } = useCourses();
   const { data: events } = useEvents();
 
   // Enrich bookings with class/course/event details and payment info
   const enrichedBookings = useMemo(() => {
-    if (!bookings || !classes || !courses || !events) return [];
+    if (!bookings || !courses || !events) return [];
 
     return bookings
       .map((booking) => {
@@ -74,15 +65,15 @@ export default function StudentDetail() {
         let itemTypeName = "";
 
         // Match by itemId and itemType
-        if (booking.itemType === "single") {
-          itemDetails = classes.find((c) => c.id === booking.itemId);
-          itemTypeName = "Enkelttime";
-        } else if (booking.itemType === "course") {
-          itemDetails = courses.find((c) => c.id === booking.itemId);
+        if (booking.itemType === "course") {
+          itemDetails = courses.data.find((c) => c.id === booking.itemId);
           itemTypeName = "Kurs";
         } else if (booking.itemType === "event") {
-          itemDetails = events.find((e) => e.id === booking.itemId);
+          itemDetails = events.data.find((e) => e.id === booking.itemId);
           itemTypeName = "Event";
+        } else {
+          // Handle any other types as single class
+          itemTypeName = "Enkelttime";
         }
 
         // Get payment info
@@ -101,7 +92,7 @@ export default function StudentDetail() {
         (a, b) =>
           new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime(),
       );
-  }, [bookings, classes, courses, events]);
+  }, [bookings, courses, events]);
 
   // Calculate payment stats
   const paymentStats = useMemo(() => {
@@ -242,7 +233,7 @@ export default function StudentDetail() {
                 <h3 className="font-medium text-foreground">Nødkontakt</h3>
                 <div className="text-sm text-muted-foreground">
                   <p className="font-medium">{student.emergencyContact.name}</p>
-                  <p>{student.emergencyContact.relation}</p>
+                  <p>{student.emergencyContact.relationship}</p>
                   <p>{student.emergencyContact.phone}</p>
                 </div>
               </div>
@@ -366,11 +357,13 @@ export default function StudentDetail() {
                     <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
                       <div className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1.5" />
-                        {formatDate(new Date(booking.itemDetails.date))}
+                        {formatDate(
+                          new Date((booking.itemDetails as any).date),
+                        )}
                       </div>
                       <div className="flex items-center">
                         <Clock className="h-4 w-4 mr-1.5" />
-                        {booking.itemDetails.startTime}
+                        {(booking.itemDetails as any).startTime}
                       </div>
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 mr-1.5" />

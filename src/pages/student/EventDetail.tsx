@@ -54,10 +54,8 @@ export default function EventDetail() {
       await createBooking({
         studentId: user.id,
         itemId: eventData.id,
-        itemType: "single",
-        status: "confirmed",
+        itemType: "event",
         bookingDate: new Date(),
-        price: eventData.price,
       });
 
       setBookingSuccess(true);

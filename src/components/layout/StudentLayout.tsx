@@ -8,6 +8,7 @@ import { ROUTES } from "@/config/constants";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Leaf, Calendar, User, LogOut, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DevScenarioToggle } from "@/components/dev/DevScenarioToggle";
 
 interface StudentLayoutProps {
   children: ReactNode;
@@ -126,6 +127,9 @@ export default function StudentLayout({ children }: StudentLayoutProps) {
           })}
         </div>
       </nav>
+
+      {/* DEV ONLY: Scenario Toggle */}
+      <DevScenarioToggle />
     </div>
   );
 }

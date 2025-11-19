@@ -11,9 +11,37 @@ import type {
   User,
 } from "@/types";
 import { mockBookings, mockPayments } from "@/mock-data/bookings";
+import { getScenarioData } from "@/mock-data/scenarios";
 import { mockApiCall, paginate, MockApiError } from "./api";
 import { generateId } from "@/utils/id";
 import { CURRENCY } from "@/config/constants";
+
+// DEV ONLY: Check for active scenario
+const getActiveBookings = () => {
+  if (import.meta.env.MODE === "development") {
+    const scenario = localStorage.getItem("yoga_booking_dev_scenario");
+    if (scenario && scenario !== "normal") {
+      const scenarioData = getScenarioData(scenario);
+      if (scenarioData) {
+        return scenarioData.bookings;
+      }
+    }
+  }
+  return bookings;
+};
+
+const getActivePayments = () => {
+  if (import.meta.env.MODE === "development") {
+    const scenario = localStorage.getItem("yoga_booking_dev_scenario");
+    if (scenario && scenario !== "normal") {
+      const scenarioData = getScenarioData(scenario);
+      if (scenarioData) {
+        return scenarioData.payments;
+      }
+    }
+  }
+  return payments;
+};
 
 // In-memory storage
 let bookings = [...mockBookings];
@@ -44,7 +72,8 @@ export const getBookings = async (
   pagination?: PaginationParams,
 ): Promise<PaginatedResponse<Booking>> => {
   return mockApiCall(() => {
-    let filtered = [...bookings];
+    // DEV ONLY: Use scenario data if active
+    let filtered = [...getActiveBookings()];
 
     if (filters?.status) {
       filtered = filtered.filter((b) => b.status === filters.status);
@@ -245,7 +274,8 @@ export const getPayments = async (
   pagination?: PaginationParams,
 ): Promise<PaginatedResponse<Payment>> => {
   return mockApiCall(() => {
-    let filtered = [...payments];
+    // DEV ONLY: Use scenario data if active
+    let filtered = [...getActivePayments()];
 
     if (filters?.status) {
       filtered = filtered.filter((p) => p.status === filters.status);

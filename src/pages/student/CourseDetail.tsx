@@ -65,9 +65,7 @@ export default function CourseDetail() {
         studentId: user.id,
         itemId: courseData.id,
         itemType: "course",
-        status: "confirmed",
         bookingDate: new Date(),
-        price: courseData.price,
       });
 
       setBookingSuccess(true);

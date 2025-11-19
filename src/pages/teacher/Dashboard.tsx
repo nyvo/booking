@@ -1,70 +1,182 @@
 /**
- * Teacher dashboard - refined calm, premium yoga instructor experience
- * Unified design with primary blue accent and improved visual hierarchy
+ * Teacher Dashboard - "Elevation Layers" Layout
+ *
+ * Visual hierarchy through elevation:
+ * 1. Full-width toolbar (border-bottom, bg-white/80)
+ * 2. Hero "Neste økt" (shadow-md, bg-white/95, text-2xl, rounded-3xl)
+ * 3. "Timeplanen din" agenda (shadow-sm, bg-white/90, text-base, rounded-2xl)
+ * 4. "Aktive kurs" grid (shadow-sm, bg-white/85, text-lg, rounded-3xl)
+ *
+ * Design: Elevation + backdrop-blur creates clear visual layers.
+ * Typography: Strong hierarchy (text-4xl → text-2xl → text-lg → text-base).
+ * Spacing: 16/24/32 vertical rhythm between sections.
  */
 
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Calendar,
-  Leaf,
-  CalendarDays,
-  CalendarPlus,
-  Users,
-  Banknote,
-  MapPin,
-  Clock,
-  TrendingUp,
-  Plus,
-  ChevronRight,
-} from "lucide-react";
+import { MapPin, Clock, Plus, Users } from "lucide-react";
 import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useTeacherRevenue, useBookings } from "@/hooks/useBookings";
 import { useCourses, useEvents } from "@/hooks/useClasses";
 import { formatDisplayDate } from "@/utils/date";
-import { CURRENCY, ROUTES } from "@/config/constants";
+import { ROUTES } from "@/config/constants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  getDashboardState,
+  getDateLabel,
+  type DashboardItem,
+} from "@/utils/dashboardState";
+import { useScenario } from "@/contexts/ScenarioContext";
+import {
+  getScenarioDashboardData,
+  shouldUseScenarioData,
+} from "@/utils/scenarioDashboard";
+
+// Weekday names for course metadata
+const WEEKDAY_NAMES: Record<number, string> = {
+  0: "Søndager",
+  1: "Mandager",
+  2: "Tirsdager",
+  3: "Onsdager",
+  4: "Torsdager",
+  5: "Fredager",
+  6: "Lørdager",
+};
+
+/**
+ * Slim agenda row for upcoming sessions
+ * Visual weight: shadow-sm, bg-white/90
+ */
+function UpcomingSessionRow({
+  item,
+  navigate,
+}: {
+  item: DashboardItem;
+  navigate: (path: string) => void;
+}) {
+  const handleClick = () => {
+    if (item.type === "course") {
+      navigate(ROUTES.TEACHER.COURSES_DETAIL.replace(":id", item.data.id));
+    } else {
+      navigate(ROUTES.TEACHER.EVENTS_DETAIL.replace(":id", item.data.id));
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="group w-full flex items-center justify-between gap-6 rounded-2xl border border-border/60 bg-white/90 px-5 py-4 text-left shadow-sm backdrop-blur transition-all hover:border-border hover:bg-white hover:shadow cursor-pointer"
+    >
+      <div className="flex-1 space-y-1">
+        <div className="flex items-center gap-2.5">
+          <h3 className="text-base font-medium text-slate-900">
+            {item.data.name}
+          </h3>
+          <Badge
+            variant="secondary"
+            className="bg-accent-lavender/10 text-accent-lavender border-transparent text-xs font-medium"
+          >
+            {item.type === "course" ? "Kurs" : "Event"}
+          </Badge>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          <span className="capitalize">{getDateLabel(item)}</span>
+          <span className="mx-2">·</span>
+          <span>{item.time}</span>
+          <span className="mx-2">·</span>
+          <span>{item.location}</span>
+        </p>
+      </div>
+      <div className="flex flex-col items-end justify-center gap-0.5 shrink-0">
+        <p className="text-sm font-medium text-slate-700">
+          {item.enrolled}/{item.capacity}
+        </p>
+        <p className="text-xs text-muted-foreground">påmeldte</p>
+      </div>
+    </button>
+  );
+}
+
+/**
+ * Large course card for grid display
+ * Visual weight: shadow-sm, bg-white/85
+ */
+function CourseCard({
+  course,
+  navigate,
+}: {
+  course: any;
+  navigate: (path: string) => void;
+}) {
+  const handleClick = () => {
+    navigate(ROUTES.TEACHER.COURSES_DETAIL.replace(":id", course.id));
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="group rounded-3xl border border-border/60 bg-white/85 p-6 text-left shadow-sm backdrop-blur transition-all hover:border-border hover:bg-white hover:shadow-md cursor-pointer"
+    >
+      <div className="space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-lg font-semibold text-slate-900 leading-snug">
+            {course.name}
+          </h3>
+          <Badge
+            variant="outline"
+            className="shrink-0 bg-accent-mint/10 text-accent-mint border-accent-mint/20 text-xs font-medium"
+          >
+            {course.numberOfWeeks} uker
+          </Badge>
+        </div>
+        <div className="space-y-1.5">
+          <p className="text-sm text-muted-foreground">
+            Starter {formatDisplayDate(course.startDate)}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {WEEKDAY_NAMES[course.recurringDayOfWeek]} · {course.recurringTime}
+          </p>
+        </div>
+        <div className="flex items-center justify-between pt-3 border-t border-border/40">
+          <span className="text-sm text-muted-foreground">Påmeldte</span>
+          <span className="text-base font-medium text-slate-700">
+            {course.enrolledCount}/{course.capacity}
+          </span>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full rounded-full mt-2"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleClick();
+          }}
+        >
+          Administrer kurs
+        </Button>
+      </div>
+    </button>
+  );
+}
 
 export default function TeacherDashboard() {
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const teacherId = user?.id;
 
-  // Date references
+  // DEV ONLY: Scenario support
+  const { scenario, isEnabled: scenarioEnabled } = useScenario();
+
+  // Date reference
   const today = useMemo(() => {
     const date = new Date();
     date.setHours(0, 0, 0, 0);
     return date;
   }, []);
 
-  const startOfWeek = useMemo(() => {
-    const date = new Date(today);
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    date.setDate(diff);
-    return date;
-  }, [today]);
-
-  const endOfWeek = useMemo(() => {
-    const date = new Date(startOfWeek);
-    date.setDate(date.getDate() + 6);
-    return date;
-  }, [startOfWeek]);
-
-  const tomorrow = useMemo(() => {
-    const date = new Date(today);
-    date.setDate(date.getDate() + 1);
-    return date;
-  }, [today]);
-
   // Filters
-  const thisWeekFilters = useMemo(
-    () => (teacherId ? { teacherId, dateFrom: startOfWeek } : undefined),
-    [teacherId, startOfWeek],
-  );
-
   const upcomingFilters = useMemo(
     () => (teacherId ? { teacherId, dateFrom: today } : undefined),
     [teacherId, today],
@@ -72,358 +184,261 @@ export default function TeacherDashboard() {
 
   const pagination = useMemo(() => ({ page: 1, pageSize: 20 }), []);
 
-  // Data fetching
-  const { data: revenue } = useTeacherRevenue(teacherId);
-  const { data: allBookingsData } = useBookings();
-
-  const { data: thisWeekCourses } = useCourses(thisWeekFilters, pagination);
-  const { data: thisWeekEvents } = useEvents(thisWeekFilters, pagination);
-
+  // Data fetching (real API data)
   const { data: upcomingCourses, loading: loadingUpcoming } = useCourses(
     upcomingFilters,
     pagination,
   );
   const { data: upcomingEvents } = useEvents(upcomingFilters, pagination);
 
-  const allBookings = allBookingsData?.data || [];
+  // All courses (for "Aktive kurs" section)
+  const allCoursesFilters = useMemo(
+    () => (teacherId ? { teacherId } : undefined),
+    [teacherId],
+  );
+  const { data: allCourses } = useCourses(allCoursesFilters, pagination);
 
-  // Calculate upcoming classes grouped by date
-  const upcomingClassesGrouped = useMemo(() => {
-    const courses = (upcomingCourses?.data || []).map((item) => ({
-      type: "course" as const,
-      data: item,
-      date: new Date(item.startDate),
-    }));
-    const events = (upcomingEvents?.data || []).map((item) => ({
-      type: "event" as const,
-      data: item,
-      date: new Date(item.date),
-    }));
+  // ========================================
+  // DEV ONLY: Override data with scenario data if enabled
+  // ========================================
+  const { courses: displayCourses, events: displayEvents } = useMemo(() => {
+    if (scenarioEnabled && shouldUseScenarioData()) {
+      const scenarioData = getScenarioDashboardData(scenario);
+      return {
+        courses: scenarioData.courses,
+        events: scenarioData.events,
+      };
+    }
+    // Production: use real API data
+    return {
+      courses: upcomingCourses?.data || [],
+      events: upcomingEvents?.data || [],
+    };
+  }, [scenarioEnabled, scenario, upcomingCourses, upcomingEvents]);
 
-    const combined = [...courses, ...events];
-    combined.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-    const todayItems = combined.filter((item) => {
-      const itemDate = new Date(item.date);
-      itemDate.setHours(0, 0, 0, 0);
-      return itemDate.getTime() === today.getTime();
-    });
-
-    const tomorrowItems = combined.filter((item) => {
-      const itemDate = new Date(item.date);
-      itemDate.setHours(0, 0, 0, 0);
-      return itemDate.getTime() === tomorrow.getTime();
-    });
-
-    const laterThisWeek = combined.filter((item) => {
-      const itemDate = new Date(item.date);
-      itemDate.setHours(0, 0, 0, 0);
-      return itemDate > tomorrow && itemDate <= endOfWeek;
-    });
-
-    const groups = [];
-    if (todayItems.length > 0)
-      groups.push({
-        label: "I dag",
-        items: todayItems,
-        color: "border-l-primary",
-      });
-    if (tomorrowItems.length > 0)
-      groups.push({
-        label: "I morgen",
-        items: tomorrowItems,
-        color: "border-l-primary/70",
-      });
-    if (laterThisWeek.length > 0)
-      groups.push({
-        label: "Senere denne uken",
-        items: laterThisWeek,
-        color: "border-l-primary/50",
-      });
-
-    return groups;
-  }, [upcomingCourses, upcomingEvents, today, tomorrow, endOfWeek]);
-
-  // Weekly stats
-  const weeklyStats = useMemo(() => {
-    const weekCourses = thisWeekCourses?.data || [];
-    const weekEvents = thisWeekEvents?.data || [];
-
-    const totalClasses = weekCourses.length + weekEvents.length;
-
-    const totalEnrollments = [
-      ...weekCourses.map((c) => c.enrolledCount || 0),
-      ...weekEvents.map((e) => e.bookedCount || 0),
-    ].reduce((sum, count) => sum + count, 0);
-
-    const weeklyRevenue = [
-      ...weekCourses.map((c) => (c.enrolledCount || 0) * c.price),
-      ...weekEvents.map((e) => (e.bookedCount || 0) * e.price),
-    ].reduce((sum, rev) => sum + rev, 0);
-
-    return { totalClasses, totalEnrollments, weeklyRevenue };
-  }, [thisWeekCourses, thisWeekEvents]);
+  // ========================================
+  // Dashboard State
+  // ========================================
+  const dashboardState = useMemo(() => {
+    return getDashboardState(displayCourses, displayEvents, today);
+  }, [displayCourses, displayEvents, today]);
 
   return (
     <TeacherLayout>
-      <div className="max-w-5xl space-y-6">
-        {/* Personal Greeting */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-medium text-foreground mb-2">
-            Hei, {user?.name?.split(" ")[0] || user?.name} 🌿
-          </h1>
-          <p className="text-base text-muted-foreground">
-            Her er hva som skjer i praksisen din denne uken.
-          </p>
-        </div>
+      {/* Page wrapper with bg-canvas + subtle gradient */}
+      <div className="min-h-screen">
+        {/* Subtle ambient gradient background */}
+        <div
+          className="fixed inset-0 -z-10"
+          style={{
+            background: `
+              radial-gradient(circle at top left, rgba(78, 149, 255, 0.06), transparent 50%),
+              radial-gradient(circle at bottom right, rgba(165, 180, 252, 0.05), transparent 50%),
+              #F5F4F1
+            `,
+          }}
+        />
 
-        {/* Weekly Overview */}
-        <div className="rounded-2xl bg-white border border-border shadow-sm px-6 py-5">
-          <div className="grid grid-cols-3 gap-6">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2.5">
-                <CalendarDays className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="text-xs font-medium text-muted-foreground mb-0.5">
-                  Timer denne uken
-                </div>
-                <div className="text-2xl font-semibold text-foreground">
-                  {weeklyStats.totalClasses}
-                </div>
-              </div>
+        {/* ============================= */}
+        {/* TOP TOOLBAR (NON-STICKY, CLEAN BAR) */}
+        {/* ============================= */}
+        <div className="mb-12">
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-6 px-6 md:px-8">
+            <div className="space-y-1">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
+                Timeplan og kurs
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Hei, {user?.name?.split(" ")[0] || user?.name}
+              </p>
             </div>
-
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2.5">
-                <Users className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="text-xs font-medium text-muted-foreground mb-0.5">
-                  Påmeldinger
-                </div>
-                <div className="text-2xl font-semibold text-foreground">
-                  {weeklyStats.totalEnrollments}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2.5">
-                <Banknote className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <div className="text-xs font-medium text-muted-foreground mb-0.5">
-                  Inntekter
-                </div>
-                <div className="text-2xl font-semibold text-foreground">
-                  {weeklyStats.weeklyRevenue.toLocaleString("nb-NO")} {CURRENCY}
-                </div>
-              </div>
+            <div className="flex items-center gap-2 md:gap-3">
+              <Button
+                onClick={() => navigate(ROUTES.TEACHER.STUDENTS)}
+                variant="ghost"
+                size="sm"
+                className="hidden text-sm text-muted-foreground hover:text-slate-900 md:inline-flex"
+              >
+                Påmeldinger
+              </Button>
+              <Button
+                onClick={() => navigate(ROUTES.TEACHER.EVENTS_CREATE)}
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+              >
+                <span className="hidden sm:inline">Nytt event</span>
+                <span className="sm:hidden">Event</span>
+              </Button>
+              <Button
+                onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
+                variant="default"
+                size="sm"
+                className="rounded-full"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Nytt kurs</span>
+                <span className="sm:hidden">Kurs</span>
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
-            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow-sm cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
-                <Plus className="h-5 w-5 text-primary" />
-              </div>
-              <div className="text-sm font-semibold text-foreground">
-                Nytt kurs
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-
-          <button
-            onClick={() => navigate(ROUTES.TEACHER.EVENTS_CREATE)}
-            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
-                <CalendarPlus className="h-5 w-5 text-primary" />
-              </div>
-              <div className="text-sm font-semibold text-foreground">
-                Nytt arrangement
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-
-          <button
-            onClick={() => navigate(ROUTES.TEACHER.STUDENTS)}
-            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
-                <Users className="h-5 w-5 text-primary" />
-              </div>
-              <div className="text-sm font-semibold text-foreground">
-                Påmeldinger
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-
-          <button
-            onClick={() => navigate(ROUTES.TEACHER.PAYMENTS)}
-            className="group flex items-center justify-between gap-3 rounded-2xl bg-white border border-border shadow-sm px-4 py-3.5 text-left transition-all hover:bg-primary/5 hover:border-primary/40 hover:shadow cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-primary/10 p-2.5 group-hover:bg-primary/20 transition-colors">
-                <TrendingUp className="h-5 w-5 text-primary" />
-              </div>
-              <div className="text-sm font-semibold text-foreground">
-                Betalinger
-              </div>
-            </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-        </div>
-
-        {/* Dine neste timer */}
-        <div>
-          <h2 className="text-xl font-semibold text-foreground mb-4">
-            Dine neste timer
-          </h2>
-
+        <div className="mx-auto max-w-5xl space-y-16 px-6 pb-16 md:px-8">
+          {/* ============================= */}
+          {/* HERO: NESTE ØKT (shadow-md, bg-white/95, text-2xl) */}
+          {/* ============================= */}
           {loadingUpcoming ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-20 animate-pulse rounded-xl bg-secondary"
-                ></div>
-              ))}
-            </div>
-          ) : upcomingClassesGrouped.length === 0 ? (
-            <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/30 px-4 py-3.5 shadow-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Ingen kommende timer
-              </span>
-              <Button
-                onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
-                size="sm"
-                variant="outline"
-                className="ml-auto cursor-pointer"
-              >
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                Opprett kurs
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              {upcomingClassesGrouped.map((group) => (
-                <div key={group.label} className="space-y-2">
-                  <div className="text-xs font-bold text-foreground/70">
-                    {group.label}
+            <div className="h-56 animate-pulse rounded-3xl bg-white/70 shadow-sm" />
+          ) : !dashboardState.hasUpcoming ? (
+            // Empty state
+            <Card className="rounded-3xl border border-border/60 bg-white/95 shadow-md backdrop-blur">
+              <CardContent className="space-y-6 py-16">
+                <div className="space-y-3 text-center">
+                  <h2 className="text-2xl font-semibold text-slate-900">
+                    Du har ingen planlagte økter
+                  </h2>
+                  <p className="text-base text-muted-foreground">
+                    Opprett ditt første kurs eller arrangement for å komme i
+                    gang.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Button
+                    onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
+                    variant="default"
+                    className="rounded-full"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Opprett kurs
+                  </Button>
+                  <Button
+                    onClick={() => navigate(ROUTES.TEACHER.EVENTS_CREATE)}
+                    variant="outline"
+                    className="rounded-full"
+                  >
+                    Opprett event
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : dashboardState.nextSession ? (
+            // Hero card for next session
+            <Card className="rounded-3xl border border-border/60 bg-white/95 shadow-md backdrop-blur">
+              <CardContent className="space-y-6 p-6 md:p-8">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Neste økt
+                    </p>
+                    <Badge
+                      variant="secondary"
+                      className="border-transparent bg-accent-lavender/10 text-accent-lavender"
+                    >
+                      {dashboardState.nextSession.type === "course"
+                        ? "Kurs"
+                        : "Event"}
+                    </Badge>
                   </div>
-
-                  <div className="space-y-2">
-                    {group.items.map((item) => {
-                      const { type, data } = item;
-                      const displayDate =
-                        type === "course" ? data.startDate : data.date;
-                      const displayTime =
-                        type === "course" ? data.recurringTime : data.startTime;
-                      const enrolled =
-                        type === "course"
-                          ? data.enrolledCount
-                          : data.bookedCount;
-                      const capacity = data.capacity;
-                      const percentage = Math.round(
-                        (enrolled / capacity) * 100,
-                      );
-
-                      return (
-                        <div
-                          key={`${type}-${data.id}`}
-                          className={`group relative pl-4 pr-5 py-4 rounded-2xl bg-white border-l-[3px] ${group.color} border-r border-t border-b border-border shadow-sm hover:shadow transition-all cursor-pointer`}
-                          onClick={() => {
-                            if (type === "course") {
-                              navigate(
-                                ROUTES.TEACHER.COURSES_EDIT.replace(
-                                  ":id",
-                                  data.id,
-                                ),
-                              );
-                            } else {
-                              navigate(
-                                ROUTES.TEACHER.EVENTS_EDIT.replace(
-                                  ":id",
-                                  data.id,
-                                ),
-                              );
-                            }
-                          }}
-                        >
-                          <div className="flex items-center justify-between gap-6">
-                            <div className="flex-1 space-y-1.5">
-                              <div className="flex items-center gap-2.5">
-                                <Badge
-                                  variant="secondary"
-                                  className="text-xs px-2 py-0.5"
-                                >
-                                  {type === "course" ? "Kurs" : "Arrangement"}
-                                </Badge>
-                                <h3 className="font-semibold text-foreground text-sm">
-                                  {data.name}
-                                </h3>
-                              </div>
-
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3" />
-                                  <span>{formatDisplayDate(displayDate)}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  <span>kl. {displayTime}</span>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="h-3 w-3" />
-                                  <span>{data.location}</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex flex-col items-end gap-1.5 shrink-0">
-                              <div className="text-right">
-                                <div className="text-base font-semibold text-foreground">
-                                  {enrolled}/{capacity}
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  påmeldte
-                                </div>
-                              </div>
-
-                              <div className="w-20 h-1.5 bg-muted/50 rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full transition-all ${
-                                    percentage >= 90
-                                      ? "bg-primary"
-                                      : percentage >= 60
-                                        ? "bg-primary/70"
-                                        : "bg-primary/40"
-                                  }`}
-                                  style={{ width: `${percentage}%` }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <h2 className="text-2xl font-semibold leading-tight tracking-tight text-slate-900 md:text-3xl">
+                    {dashboardState.nextSession.data.name}
+                  </h2>
+                </div>
+                <div className="space-y-2 text-base text-slate-700">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium capitalize">
+                      {getDateLabel(dashboardState.nextSession)}
+                    </span>
+                    <span className="text-muted-foreground">·</span>
+                    <span className="font-semibold">
+                      {dashboardState.nextSession.time}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{dashboardState.nextSession.location}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span>
+                      {dashboardState.nextSession.enrolled} av{" "}
+                      {dashboardState.nextSession.capacity} påmeldte
+                    </span>
                   </div>
                 </div>
-              ))}
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {/* ============================= */}
+          {/* TIMEPLANEN DIN (shadow-sm, bg-white/90, text-base) */}
+          {/* ============================= */}
+          {dashboardState.remainingUpcoming.length > 0 && (
+            <div className="space-y-6">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-medium text-slate-900">
+                  Timeplanen din
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Neste økter de kommende dagene
+                </p>
+              </div>
+              <div className="space-y-3">
+                {dashboardState.remainingUpcoming.slice(0, 6).map((item) => (
+                  <UpcomingSessionRow
+                    key={`${item.type}-${item.data.id}`}
+                    item={item}
+                    navigate={navigate}
+                  />
+                ))}
+              </div>
+              {dashboardState.remainingUpcoming.length > 6 && (
+                <div className="text-right">
+                  <button
+                    onClick={() => navigate(ROUTES.TEACHER.COURSES)}
+                    className="cursor-pointer text-sm text-muted-foreground underline-offset-4 transition-all hover:text-slate-900 hover:underline"
+                  >
+                    Se full kalender →
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ============================= */}
+          {/* AKTIVE KURS (shadow-sm, bg-white/85, text-lg) */}
+          {/* ============================= */}
+          {allCourses && allCourses.data.length > 0 && (
+            <div className="space-y-8 border-t border-border/40 pt-16">
+              <div className="space-y-1">
+                <h2 className="text-2xl font-medium text-slate-900">
+                  Aktive kurs
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Kursforløp du underviser denne sesongen
+                </p>
+              </div>
+              <div className="grid gap-6 sm:grid-cols-2">
+                {allCourses.data.slice(0, 4).map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    navigate={navigate}
+                  />
+                ))}
+              </div>
+              {allCourses.data.length > 4 && (
+                <div className="flex justify-center pt-4">
+                  <Button
+                    onClick={() => navigate(ROUTES.TEACHER.COURSES)}
+                    variant="outline"
+                    className="rounded-full"
+                  >
+                    Se alle kurs →
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </div>

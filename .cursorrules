@@ -6,15 +6,11 @@ These rules define how the AI assistant (Claude) should generate UI and code for
 
 All generated frontend code MUST assume:
 
-React 19
-
-TypeScript
-
-Vite
-
-Tailwind CSS v4
-
-shadcn/ui components
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS v4
+- shadcn/ui components
 
 No other UI frameworks or styling systems should be introduced (e.g. no MUI, no Chakra, no styled-components).
 
@@ -26,13 +22,10 @@ This is a yoga booking app with two core surfaces:
 
 Used by yoga teachers to:
 
-Manage class schedules
-
-See upcoming sessions
-
-View student lists & attendance
-
-Track earnings & payouts
+- Manage class schedules
+- See upcoming sessions
+- View student lists & attendance
+- Track earnings & payouts
 
 This surface does use a sidebar navigation.
 
@@ -40,59 +33,55 @@ This surface does use a sidebar navigation.
 
 Used by students to:
 
-Discover classes + teachers
-
-Browse by day/time/level/location
-
-Book and pay
+- Discover classes + teachers
+- Browse by day/time/level/location
+- Book and pay
 
 This surface must NEVER have a sidebar.
 It should feel open, calm, friendly, and non-admin-like.
 
 3. Design System
+
 3.1 Style Inspiration
 
 Inspired by calm SaaS aesthetics such as Cluely:
 
-Soft, muted colors
-
-Lots of whitespace
-
-Subtle gradient background washes
-
-Large, readable headings
-
-Minimal clutter
-
-A light, breathable look
+- Soft, muted colors
+- Lots of whitespace
+- Subtle gradient background washes
+- Large, readable headings
+- Minimal clutter
+- A light, breathable look
 
 The overall feel should be calm, soft, and welcoming — not corporate or busy.
 
 4. Colors
 
-Use a limited soft palette, mapped to CSS variables:
+Use a limited, soft palette mapped to CSS variables:
 
-primary: soft blue (#4E95FF)
-
-accent: soft lavender or mint (#A5B4FC or #A7F3D0)
-
-bg: very light neutral (#F9FAFB)
-
-surface: white or near-white
-
-border: light gray (#E5E7EB)
-
-muted: soft neutral for secondary text
+- primary: soft blue (#4E95FF)
+- primary-subtle: very light blue wash for backgrounds (#EFF4FF)
+- accent-lavender: soft lavender (#A5B4FC)
+- accent-mint: soft mint (#A7F3D0)
+- bg-canvas: warm light neutral (#F5F4F1)
+- bg-muted: soft gray neutral (#F3F4F6)
+- surface: white or near-white (#FFFFFF)
+- border: light gray (#E5E7EB)
+- muted: soft neutral for secondary text (#64748B)
 
 Color Rules
 
-Use primary sparingly for CTAs and small highlights.
-
-Use accent for subtle pills, tags, and soft visual anchors.
-
-Avoid loud colors or neon gradients.
-
-Most surfaces should be white or near-white.
+- The main page background MUST NOT be pure white.
+  - Use bg-canvas for the outer page background.
+  - Use surface (white) ONLY for cards and elevated content.
+- Use primary sparingly for:
+  - Main CTAs
+  - Small highlights (time pills, active day, active nav item)
+- Use accent-lavender or accent-mint for:
+  - Tags
+  - Soft “status” or “level” labels
+- Avoid loud colors or neon gradients.
+- Most surfaces should be white or near-white, sitting on top of a slightly tinted background so there is clear separation.
 
 5. Gradients
 
@@ -102,120 +91,194 @@ Use a helper like:
 
 .bg-soft-gradient {
   background:
-    radial-gradient(circle at top left, rgba(78, 149, 255, 0.18), transparent 55%),
-    radial-gradient(circle at bottom right, rgba(148, 163, 253, 0.22), transparent 55%);
+    radial-gradient(circle at top left, rgba(78, 149, 255, 0.14), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(148, 163, 253, 0.16), transparent 55%);
 }
 
 Gradient Rules
 
-At most two gradient sections per page.
-
-Keep gradients soft, subtle, and low-opacity.
-
-Never use high-saturation or harsh diagonal gradients.
+- At most two gradient sections per page.
+- Gradients should sit behind content (page background, hero area), never on individual cards.
+- Keep gradients soft, subtle, and low-opacity.
+- Never use high-saturation or harsh diagonal gradients.
 
 6. Typography
 
-Use a clean geometric sans (Geist/Inter-like).
+Use a clean geometric sans (Geist) — this is the primary font.
 
-Headings should be large but calm — not marketing-loud.
+Headings
 
-Body text should be comfortable to read with medium line-height.
+- h1: text-3xl–text-4xl, font-semibold, tracking-tight
+- h2: text-2xl, font-medium or semibold
+- h3: text-xl, font-medium
 
-Suggested scale:
+Body
 
-h1: text-3xl–text-4xl
+- Body: text-sm–text-base, line-height relaxed.
+- Meta: text-xs with muted color.
 
-h2: text-2xl
+Rules
 
-h3: text-xl
-
-Body: text-sm–text-base
-
-Meta text: text-xs with muted color
-
-Do not use ALL CAPS except for tiny labels.
+- Do NOT use ALL CAPS except for tiny labels (meta).
+- Text color defaults:
+  - Primary text: slate-900 / text-primary
+  - Secondary text: text-muted-foreground
+- Never use very low-contrast light grey on white for key information.
 
 7. Spacing & Radii
 
 Allowed spacing scale: 4 / 8 / 12 / 16 / 24 / 32.
-
 No random spacing values.
 
-Cards/surfaces: rounded-xl, rounded-2xl, or rounded-3xl.
+Cards / surfaces:
 
-Pills/tags: rounded-full.
+- rounded-2xl or rounded-3xl for main cards.
+- rounded-xl for smaller inline surfaces (list items, compact cards).
 
-Avoid tiny radii (rounded-sm).
+Pills / tags:
+
+- rounded-full.
+
+Avoid tiny radii (no rounded-sm).
+Global layout should have generous section padding (24–32px) and consistent vertical rhythm.
 
 8. Components & Styling
+
 8.1 Cards
 
 Use light borders, minimal shadow:
 
-<Card className="border border-border/60 shadow-sm rounded-3xl bg-white/80 backdrop-blur" />
+<Card className="border border-border/60 shadow-sm rounded-3xl bg-white/90 backdrop-blur" />
+
+Rules:
+
+- Cards MUST have a visible border OR a clear background contrast against the page (never flat-white-on-white).
+- Important / “next class” cards can have a subtle left border or top border in primary-subtle, NOT a full solid primary block.
+- Use padding 16–24px inside cards.
 
 8.2 Buttons
 
-Prefer outline (variant="outline") and soft variants.
+- Prefer soft/outline buttons for secondary actions.
+- Reserve solid primary buttons for 1–2 key actions per screen.
 
-Use solid primary buttons sparingly.
+Examples:
 
-All buttons and links MUST have cursor-pointer on hover.
+Primary CTA:
 
-Always add `cursor-pointer` or ensure it's applied by default.
+<Button className="rounded-full px-4 py-2 text-sm font-medium">
+  Book class
+</Button>
+
+Secondary / outline:
+
+<Button variant="outline" className="rounded-full px-3 py-1.5 text-sm">
+  Edit schedule
+</Button>
+
+Rules:
+
+- All buttons and clickable elements MUST show interactive affordance:
+  - cursor-pointer
+  - subtle background or border change on hover
+- Do not fill the entire header with multiple solid buttons – there should be one visual primary action at most.
+- Use solid primary buttons sparingly.
 
 8.3 Icons
 
-Use icons only for clarity, never decoration.
+- Use icons only for clarity, never decoration.
 
 8.4 Dialogs & Sheets
 
-Use Dialog for confirmations (e.g., booking confirmation).
-
-Use Sheet for mobile-specific overlays (filters, details).
+- Use Dialog for confirmations (e.g., booking confirmation).
+- Use Sheet for mobile-specific overlays (filters, details).
 
 9. Layout Patterns
+
 9.1 Overall Rules
 
-Generous whitespace.
+- Generous whitespace.
+- Clear vertical hierarchy.
+- Minimal visual clutter.
+- Limited components per screen.
+- Mobile-first behavior must be intentional.
 
-Clear vertical hierarchy.
+9.2 Teacher Dashboard — Sidebar Layout
 
-Minimal visual clutter.
+Recommended concept: Calm Split Pane with Sidebar
 
-Limited components per screen.
+Structure:
 
-Mobile-first behavior must be intentional.
+[Sidebar] | [Main Area]
+
+Main Area:
+
+- Top nav (light, simple)
+- Two-pane content:
+  - Left: list/timeline of upcoming classes
+  - Right: selected class details + actions
+
+Mobile:
+
+- Sidebar collapses to a sheet.
+- Timeline list → class detail navigation.
+
+9.3 Top Navigation (Teacher Dashboard & Student Booking)
+
+General Style
+
+- Background: white with slight blur and bottom border:
+  className="bg-white/80 backdrop-blur border-b border-border/80"
+- Height: comfortable (56–72px), not cramped.
+
+Layout:
+
+- Left: logo + product name
+- Center (optional): page title or simple breadcrumb
+- Right: 1 primary button, 1–2 secondary actions as outline/text buttons
+
+Rules
+
+- Do NOT use multiple equally styled pill buttons across the top.
+- Primary action: solid primary button.
+- Secondary actions: outline or subtle ghost buttons with text-muted-foreground.
+- Nav should feel like a thin calm bar, not a heavy toolbar.
+
+Teacher Dashboard
+
+- Can include:
+  - Page title (e.g., “Dashboard” / “Schedule”)
+  - A primary CTA (e.g., “New class”)
+  - A secondary CTA (e.g., “Export”, “Share”)
+
+Student Booking
+
+- Simpler:
+  - Logo on the left
+  - Maybe a single “Sign in” / “My bookings” button on the right.
+- Never add complex nav or admin-style groupings here.
 
 10. Sidebar Rules (Important Update)
+
 10.1 Teacher Dashboard — Sidebar Allowed & Recommended
 
 The Teacher Dashboard uses the shadcn Sidebar.
 
 Rationale:
 
-Teachers have multi-section workflows.
-
-Sidebar reduces clutter versus cramming into a top nav.
-
-Creates clarity and predictable structure.
-
-Matches common patterns in productivity apps.
+- Teachers have multi-section workflows.
+- Sidebar reduces clutter versus cramming into a top nav.
+- Creates clarity and predictable structure.
+- Matches common patterns in productivity apps.
 
 Sidebar rules:
 
-Use shadcn/ui Sidebar component.
-
-Light style: border divider, no heavy shadows.
-
-Soft hover states (bg-primary/5).
-
-Icons optional; text should be clear alone.
-
-Group navigation items with whitespace, not lines.
-
-Sidebar should feel airy — not dense like an admin panel.
+- Use shadcn/ui Sidebar component.
+- Light style: border divider, no heavy shadows.
+- Soft hover states (bg-primary/5).
+- Icons optional; text should be clear alone.
+- Never use emojis instead of icons.
+- Group navigation items with whitespace, not lines.
+- Sidebar should feel airy — not dense like an admin panel.
 
 10.2 Student Booking — Sidebar NOT Allowed
 
@@ -223,23 +286,19 @@ The Student Booking Experience must never use a sidebar.
 
 Reason:
 
-Students have one simple focus: find & book a class.
-
-Sidebars introduce unnecessary complexity.
-
-Layout must feel open, calm, and less “dashboard-like”.
+- Students have one simple focus: find & book a class.
+- Sidebars introduce unnecessary complexity.
+- Layout must feel open, calm, and less “dashboard-like”.
 
 Only use:
 
-Top nav
-
-Day selector
-
-Filters
-
-Class list
+- Top nav
+- Day selector
+- Filters
+- Class list
 
 11. Page-Specific Layouts
+
 11.1 Teacher Dashboard Layout
 
 Recommended concept: Calm Split Pane with Sidebar
@@ -248,22 +307,23 @@ Structure:
 
 [Sidebar] | [Main Area]
 
-
 Main Area:
 
-Top nav (light, simple)
+- Page background: bg-canvas or bg-soft-gradient.
+- Main content sits in white cards on top of this background.
+- At least one primary “hero” card for “Next class” or “Today”.
+- Under that: list/timeline of upcoming classes in smaller, lighter cards.
 
-Two-pane content:
+Each pane should use:
 
-Left: list/timeline of upcoming classes
-
-Right: selected class details + actions
+- Max width constraints for readability.
+- Clear vertical spacing (16–24px between sections).
+- No dense table grids; use card-like rows instead.
 
 Mobile:
 
-Sidebar collapses to a sheet.
-
-Timeline list → class detail navigation.
+- Sidebar collapses to Sheet.
+- Timeline list → class detail navigation.
 
 11.2 Student Booking Layout
 
@@ -271,36 +331,28 @@ Recommended concept: Calendar-First Single Column
 
 Structure:
 
-Soft gradient top section with calm heading.
-
-Horizontal day selector.
-
-Filter chips.
-
-Single-column class cards.
-
-Booking via dialog or sheet.
-
-Mobile-friendly sticky bottom bar (optional).
+- Soft gradient top section with calm heading.
+- Horizontal day selector.
+- Filter chips.
+- Single-column class cards.
+- Booking via dialog or sheet.
+- Mobile-friendly sticky bottom bar (optional).
 
 12. Tailwind & shadcn Rules
+
 12.1 Tailwind
 
-Use Tailwind classes inside JSX.
-
-Group className values by purpose: layout → spacing → typography → color → misc.
-
-Don’t create new arbitrary values unless justified.
+- Use Tailwind classes inside JSX.
+- Group className values by purpose: layout → spacing → typography → color → misc.
+- Don’t create new arbitrary values unless justified.
 
 12.2 shadcn
 
 Use shadcn components by default:
 
-Button, Card, Input, Select
-
-Dialog, Sheet, Tabs, Avatar
-
-Sidebar (Teacher Dashboard only)
+- Button, Card, Input, Select
+- Dialog, Sheet, Tabs, Avatar
+- Sidebar (Teacher Dashboard only)
 
 Avoid building raw HTML components unless necessary.
 
@@ -312,19 +364,15 @@ Step 1 — UX Concepts (no code)
 
 Claude must:
 
-Propose 3 distinct layout concepts.
+- Propose 3 distinct layout concepts.
 
 Each concept must include:
 
-Name
-
-Short explanation
-
-ASCII wireframe
-
-How it supports yoga workflows
-
-How it avoids generic SaaS patterns
+- Name
+- Short explanation
+- ASCII wireframe
+- How it supports yoga workflows
+- How it avoids generic SaaS patterns
 
 Sidebar must only appear in Teacher Dashboard concepts.
 
@@ -332,48 +380,35 @@ Step 2 — Implementation
 
 After a concept is chosen, Claude must:
 
-Generate React 19 + TS + Vite + Tailwind v4 + shadcn/ui.
-
-Follow the wireframe exactly.
-
-Use sidebar only if the surface is the Teacher Dashboard.
-
-Never introduce extra sections.
-
-Apply the soft calm design system.
+- Generate React 19 + TS + Vite + Tailwind v4 + shadcn/ui.
+- Follow the wireframe exactly.
+- Use sidebar only if the surface is the Teacher Dashboard.
+- Never introduce extra sections.
+- Apply the soft calm design system.
 
 14. DOs and DON’Ts
+
 DO
 
-DO use sidebar for Teacher Dashboard.
-
-DO avoid sidebar for Student Booking.
-
-DO keep UI soft, light, and spacious.
-
-DO present layout concepts before coding.
-
-DO use gradients subtly.
-
-DO use outline buttons often.
-
-DO use shadcn components.
+- DO use sidebar for Teacher Dashboard.
+- DO avoid sidebar for Student Booking.
+- DO keep UI soft, light, and spacious.
+- DO present layout concepts before coding.
+- DO use gradients subtly.
+- DO use outline buttons often.
+- DO use shadcn components.
 
 DON’T
 
-DON’T use “default SaaS” patterns blindly.
-
-DON’T use dense admin-like tables.
-
-DON’T use dark themes or harsh gradients.
-
-DON’T overuse icons.
-
-DON’T add sections that weren’t approved.
-
-DON’T add a sidebar to student pages.
+- DON’T use “default SaaS” patterns blindly.
+- DON’T use dense admin-like tables.
+- DON’T use dark themes or harsh gradients.
+- DON’T overuse icons.
+- DON’T add sections that weren’t approved.
+- DON’T add a sidebar to student pages.
 
 15. Example Style Reference
+
 <Card className="border border-border/60 shadow-sm rounded-3xl bg-white/80 backdrop-blur">
   <CardHeader className="flex flex-row items-center justify-between gap-2">
     <div>

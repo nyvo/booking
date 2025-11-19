@@ -36,6 +36,7 @@ interface AuthContextType {
   ) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<void>;
+  switchRole: (role: UserRole) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -180,10 +181,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (
-    email: string,
-    password: string,
-    name: string,
-    role: UserRole,
+    _email: string,
+    _password: string,
+    _name: string,
+    _role: UserRole,
   ): Promise<void> => {
     try {
       setLoading(true);
@@ -262,7 +263,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updatePassword = async (newPassword: string): Promise<void> => {
+  const updatePassword = async (_newPassword: string): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
@@ -296,6 +297,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Dev-only function to switch roles for testing
+  const switchRole = (role: UserRole) => {
+    if (user) {
+      setUser({ ...user, role });
+      window.location.href = role === "teacher" ? "/teacher" : "/student";
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -307,6 +316,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         resetPassword,
         updatePassword,
+        switchRole,
       }}
     >
       {children}

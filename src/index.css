@@ -163,4 +163,66 @@
             ),
             #fafafa;
     }
+
+    /* Yoga-inspired subtle textures for feature cards */
+
+    /* Zen circle (enso) - bottom-right */
+    .bg-enso {
+        position: relative;
+        background-image: radial-gradient(
+            circle at 85% 85%,
+            transparent 35px,
+            rgba(78, 149, 255, 0.02) 35px,
+            rgba(78, 149, 255, 0.02) 48px,
+            transparent 48px
+        );
+    }
+
+    /* Concentric ripples - centered */
+    .bg-ripples {
+        background-image:
+            radial-gradient(
+                circle at center,
+                transparent 19px,
+                rgba(165, 180, 252, 0.03) 20px,
+                rgba(165, 180, 252, 0.03) 21px,
+                transparent 22px
+            ),
+            radial-gradient(
+                circle at center,
+                transparent 39px,
+                rgba(165, 180, 252, 0.03) 40px,
+                rgba(165, 180, 252, 0.03) 41px,
+                transparent 42px
+            ),
+            radial-gradient(
+                circle at center,
+                transparent 59px,
+                rgba(165, 180, 252, 0.03) 60px,
+                rgba(165, 180, 252, 0.03) 61px,
+                transparent 62px
+            );
+    }
+
+    /* Wave lines - diagonal flow */
+    .bg-waves {
+        background-image: repeating-linear-gradient(
+            135deg,
+            transparent,
+            transparent 40px,
+            rgba(78, 149, 255, 0.02) 40px,
+            rgba(78, 149, 255, 0.02) 41px,
+            transparent 41px,
+            transparent 80px
+        );
+    }
+
+    /* Watercolor haze - top-left corner */
+    .bg-watercolor {
+        background-image: radial-gradient(
+            ellipse at 20% 20%,
+            rgba(167, 243, 208, 0.035),
+            transparent 50%
+        );
+    }
 }

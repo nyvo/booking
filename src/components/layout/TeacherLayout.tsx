@@ -8,14 +8,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ROUTES } from "@/config/constants";
 import { useAuthContext } from "@/contexts/AuthContext";
-import {
-  Home,
-  Calendar,
-  Leaf,
-  CalendarDays,
-  Users,
-  CreditCard,
-} from "lucide-react";
+import { Home, Leaf, CalendarDays, Users, CreditCard } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +24,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { AccountCard } from "./AccountCard";
+import { DevScenarioToggle } from "@/components/dev/DevScenarioToggle";
 
 interface TeacherLayoutProps {
   children: ReactNode;
@@ -164,6 +158,9 @@ export default function TeacherLayout({ children }: TeacherLayoutProps) {
           </main>
         </div>
       </div>
+
+      {/* DEV ONLY: Scenario Toggle */}
+      <DevScenarioToggle />
     </SidebarProvider>
   );
 }

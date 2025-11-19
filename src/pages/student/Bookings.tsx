@@ -5,7 +5,7 @@
 
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, MapPin, DollarSign, AlertCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, AlertCircle } from "lucide-react";
 import StudentLayout from "@/components/layout/StudentLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useStudentBookings } from "@/hooks/useBookings";
@@ -76,7 +76,7 @@ export default function Bookings() {
         (a, b) =>
           new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime(),
       );
-  }, [bookings, classes, courses, events]);
+  }, [bookings, courses, events]);
 
   // Separate upcoming and past bookings
   const { upcomingBookings, pastBookings } = useMemo(() => {
@@ -84,14 +84,18 @@ export default function Bookings() {
     const upcoming = enrichedBookings.filter((b) => {
       if (!b.itemDetails) return false;
       const itemDate = new Date(
-        b.itemType === "course" ? b.itemDetails.startDate : b.itemDetails.date,
+        b.itemType === "course"
+          ? (b.itemDetails as any).startDate
+          : (b.itemDetails as any).date,
       );
       return itemDate >= now && b.status !== "cancelled";
     });
     const past = enrichedBookings.filter((b) => {
       if (!b.itemDetails) return false;
       const itemDate = new Date(
-        b.itemType === "course" ? b.itemDetails.startDate : b.itemDetails.date,
+        b.itemType === "course"
+          ? (b.itemDetails as any).startDate
+          : (b.itemDetails as any).date,
       );
       return (
         itemDate < now || b.status === "cancelled" || b.status === "completed"
@@ -150,14 +154,14 @@ export default function Bookings() {
           <div className="flex items-center text-sm text-muted-foreground">
             <Calendar className="h-4 w-4 mr-2 flex-shrink-0" />
             {booking.itemType === "course"
-              ? `Starter ${formatDate(new Date(booking.itemDetails.startDate))}`
-              : formatDate(new Date(booking.itemDetails.date))}
+              ? `Starter ${formatDate(new Date((booking.itemDetails as any).startDate))}`
+              : formatDate(new Date((booking.itemDetails as any).date))}
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
             {booking.itemType === "course"
-              ? `${booking.itemDetails.recurringTime} (${booking.itemDetails.numberOfWeeks} uker)`
-              : `${booking.itemDetails.startTime} (${booking.itemDetails.duration} min)`}
+              ? `${(booking.itemDetails as any).recurringTime} (${(booking.itemDetails as any).numberOfWeeks} uker)`
+              : `${(booking.itemDetails as any).startTime} (${(booking.itemDetails as any).duration} min)`}
           </div>
           <div className="flex items-center text-sm text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />

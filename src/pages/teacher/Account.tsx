@@ -13,7 +13,6 @@ import {
   Phone,
   Globe,
   User,
-  Bell,
   Calendar,
   CreditCard,
   BarChart3,

@@ -8,27 +8,39 @@
 export const colors = {
   primary: {
     DEFAULT: "#4E95FF", // Soft blue per .cursorrules
+    subtle: "#EFF4FF", // Very light blue wash for backgrounds / highlights
     foreground: "#FFFFFF",
   },
   accent: {
-    DEFAULT: "#A5B4FC", // Soft lavender per .cursorrules
+    lavender: "#A5B4FC", // Soft lavender
     mint: "#A7F3D0", // Alternative accent
+    subtle: "#EEF2FF", // Gentle accent wash
   },
   background: {
-    DEFAULT: "#F9FAFB", // Very light neutral per .cursorrules
-    surface: "#FFFFFF",
+    canvas: "#F5F4F1", // Warm light neutral for page background
+    muted: "#F3F4F6", // Muted sections, subtle panels
+    soft: "#F9FAFB", // General light neutral (can be used in components)
+    surface: "#FFFFFF", // Primary card / surface color
   },
   text: {
-    primary: "#0F172A",
-    secondary: "#64748B", // muted
-    tertiary: "#94A3B8",
+    primary: "#0F172A", // Slate-900 style
+    secondary: "#64748B", // Muted
+    tertiary: "#94A3B8", // Even softer / meta
+    onPrimary: "#FFFFFF",
   },
   border: {
     DEFAULT: "#E5E7EB", // Light gray per .cursorrules
+    subtle: "#E2E8F0", // Slightly stronger when more definition is needed
   },
-  success: "#10B981",
-  warning: "#F59E0B",
-  error: "#EF4444",
+  status: {
+    success: "#10B981",
+    warning: "#F59E0B",
+    error: "#EF4444",
+  },
+  states: {
+    hoverSoft: "rgba(148, 163, 253, 0.08)", // For hover backgrounds
+    activeSoft: "rgba(78, 149, 255, 0.10)", // For active pills / selections
+  },
 } as const;
 
 /**
@@ -97,6 +109,7 @@ export const borderRadius = {
  * Use minimal shadow - cards should be light
  */
 export const shadows = {
+  xs: "0 0 0 1px rgba(15, 23, 42, 0.02)", // Very soft outline
   sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)", // Minimal for cards
 } as const;
 

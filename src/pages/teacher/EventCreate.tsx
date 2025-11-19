@@ -2,12 +2,11 @@
  * Class creation page for teachers
  */
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
@@ -51,7 +50,7 @@ const eventFormSchema = z.object({
     .min(3, "Navn må være minst 3 tegn")
     .max(100, "Navn kan ikke være mer enn 100 tegn"),
   description: z.string().optional(),
-  date: z.date({ required_error: "Dato er påkrevd" }),
+  date: z.date(),
   startTime: z
     .string()
     .regex(
@@ -68,13 +67,12 @@ const eventFormSchema = z.object({
     .max(100, "Kapasitet kan ikke overstige 100"),
   price: z.number().min(0, "Pris kan ikke være negativ"),
   location: z.string().min(2, "Lokasjon må være minst 2 tegn"),
-  dropInAvailable: z.boolean().default(true),
+  dropInAvailable: z.boolean(),
 });
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
 export default function EventCreate() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const { create, loading, error } = useEventMutations();

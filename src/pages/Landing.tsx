@@ -6,13 +6,6 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import PricingSection from "@/components/PricingSection";
 import { ROUTES } from "@/config/constants";
 
@@ -615,11 +608,11 @@ export default function Landing() {
             <a href="#" className="transition-colors hover:text-foreground">
               Hjelp
             </a>
-            <span>·</span>
+            <span>|</span>
             <a href="#" className="transition-colors hover:text-foreground">
               Kontakt
             </a>
-            <span>·</span>
+            <span>|</span>
             <a href="#" className="transition-colors hover:text-foreground">
               Personvern
             </a>

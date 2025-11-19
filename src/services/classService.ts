@@ -10,8 +10,36 @@ import type {
   PaginationParams,
 } from "@/types";
 import { mockCourses, mockEvents } from "@/mock-data/classes";
+import { getScenarioData } from "@/mock-data/scenarios";
 import { mockApiCall, paginate, filterBySearch, MockApiError } from "./api";
 import { generateId } from "@/utils/id";
+
+// DEV ONLY: Check for active scenario
+const getActiveCourses = () => {
+  if (import.meta.env.MODE === "development") {
+    const scenario = localStorage.getItem("yoga_booking_dev_scenario");
+    if (scenario) {
+      const scenarioData = getScenarioData(scenario);
+      if (scenarioData) {
+        return scenarioData.courses;
+      }
+    }
+  }
+  return courses;
+};
+
+const getActiveEvents = () => {
+  if (import.meta.env.MODE === "development") {
+    const scenario = localStorage.getItem("yoga_booking_dev_scenario");
+    if (scenario) {
+      const scenarioData = getScenarioData(scenario);
+      if (scenarioData) {
+        return scenarioData.events;
+      }
+    }
+  }
+  return events;
+};
 
 // In-memory storage (simulates database)
 let courses = [...mockCourses];
@@ -27,7 +55,8 @@ export const getCourses = async (
   pagination?: PaginationParams,
 ): Promise<PaginatedResponse<Course>> => {
   return mockApiCall(() => {
-    let filtered = [...courses];
+    // DEV ONLY: Use scenario data if active
+    let filtered = [...getActiveCourses()];
 
     if (filters?.search) {
       filtered = filterBySearch(filtered, filters.search, [
@@ -42,9 +71,15 @@ export const getCourses = async (
     }
 
     if (filters?.dateFrom) {
-      filtered = filtered.filter(
-        (c) => new Date(c.startDate) >= filters.dateFrom!,
-      );
+      filtered = filtered.filter((c) => {
+        const startDate = new Date(c.startDate);
+        const endDate = new Date(c.endDate);
+        const filterDate = filters.dateFrom!;
+
+        // Include course if it has sessions on or after the filter date
+        // (course is ongoing or hasn't ended yet)
+        return endDate >= filterDate;
+      });
     }
 
     if (pagination) {
@@ -66,7 +101,9 @@ export const getCourses = async (
  */
 export const getCourseById = async (id: string): Promise<Course> => {
   return mockApiCall(() => {
-    const course = courses.find((c) => c.id === id);
+    // DEV ONLY: Use scenario data if active
+    const activeCourses = getActiveCourses();
+    const course = activeCourses.find((c) => c.id === id);
     if (!course) {
       throw new MockApiError("Course not found", 404);
     }
@@ -140,7 +177,8 @@ export const getEvents = async (
   pagination?: PaginationParams,
 ): Promise<PaginatedResponse<Event>> => {
   return mockApiCall(() => {
-    let filtered = [...events];
+    // DEV ONLY: Use scenario data if active
+    let filtered = [...getActiveEvents()];
 
     if (filters?.search) {
       filtered = filterBySearch(filtered, filters.search, [
@@ -186,7 +224,9 @@ export const getEvents = async (
  */
 export const getEventById = async (id: string): Promise<Event> => {
   return mockApiCall(() => {
-    const event = events.find((e) => e.id === id);
+    // DEV ONLY: Use scenario data if active
+    const activeEvents = getActiveEvents();
+    const event = activeEvents.find((e) => e.id === id);
     if (!event) {
       throw new MockApiError("Event not found", 404);
     }

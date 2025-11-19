@@ -3,9 +3,8 @@
  */
 
 import { useMemo } from "react";
-import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import TeacherLayout from "@/components/layout/TeacherLayout";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useEvents } from "@/hooks/useClasses";
@@ -15,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export default function TeacherEvents() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthContext();
 

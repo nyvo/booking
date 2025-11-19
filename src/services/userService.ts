@@ -5,7 +5,22 @@
 import type { User, Teacher, Student } from "@/types";
 import { mockTeachers } from "@/mock-data/teachers";
 import { mockStudents } from "@/mock-data/students";
+import { getScenarioData } from "@/mock-data/scenarios";
 import { mockApiCall, MockApiError } from "./api";
+
+// DEV ONLY: Check for active scenario
+const getActiveStudents = () => {
+  if (import.meta.env.MODE === "development") {
+    const scenario = localStorage.getItem("yoga_booking_dev_scenario");
+    if (scenario && scenario !== "normal") {
+      const scenarioData = getScenarioData(scenario);
+      if (scenarioData && scenarioData.students) {
+        return scenarioData.students;
+      }
+    }
+  }
+  return students;
+};
 
 // In-memory storage
 let teachers = [...mockTeachers];
@@ -115,7 +130,8 @@ export const getStudents = async (): Promise<Student[]> => {
       );
     }
 
-    return [...students];
+    // DEV ONLY: Use scenario data if active
+    return [...getActiveStudents()];
   });
 };
 
@@ -124,7 +140,9 @@ export const getStudents = async (): Promise<Student[]> => {
  */
 export const getStudentById = async (id: string): Promise<Student> => {
   return mockApiCall(() => {
-    const student = students.find((s) => s.id === id);
+    // DEV ONLY: Use scenario data if active
+    const activeStudents = getActiveStudents();
+    const student = activeStudents.find((s) => s.id === id);
     if (!student) {
       throw new MockApiError("Student not found", 404);
     }
@@ -137,7 +155,9 @@ export const getStudentById = async (id: string): Promise<Student> => {
  */
 export const getStudentByEmail = async (email: string): Promise<Student> => {
   return mockApiCall(() => {
-    const student = students.find((s) => s.email === email);
+    // DEV ONLY: Use scenario data if active
+    const activeStudents = getActiveStudents();
+    const student = activeStudents.find((s) => s.email === email);
     if (!student) {
       throw new MockApiError("Student not found", 404);
     }
@@ -185,7 +205,10 @@ export const updateStudent = async (
 /**
  * Mock login function
  */
-export const login = async (email: string, password: string): Promise<User> => {
+export const login = async (
+  email: string,
+  _password: string,
+): Promise<User> => {
   return mockApiCall(() => {
     const teacher = teachers.find((t) => t.email === email);
     if (teacher) {

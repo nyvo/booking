@@ -7,7 +7,6 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 
@@ -44,13 +43,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { TimePicker } from "@/components/ui/time-picker";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 // Form validation schema
 const courseFormSchema = z.object({
@@ -63,7 +55,7 @@ const courseFormSchema = z.object({
     .number()
     .min(1, "Antall uker må være minst 1")
     .max(52, "Antall uker kan ikke overstige 52"),
-  startDate: z.date({ required_error: "Startdato er påkrevd" }),
+  startDate: z.date(),
   recurringTime: z
     .string()
     .regex(
@@ -85,7 +77,6 @@ const courseFormSchema = z.object({
 type CourseFormValues = z.infer<typeof courseFormSchema>;
 
 export default function CourseCreate() {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuthContext();
   const { create, loading, error } = useCourseMutations();
