@@ -255,9 +255,9 @@ export default function TeacherDashboard() {
             <div className="flex items-center gap-2 md:gap-3">
               <Button
                 onClick={() => navigate(ROUTES.TEACHER.STUDENTS)}
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="hidden text-sm text-muted-foreground hover:text-slate-900 md:inline-flex"
+                className="hidden rounded-full md:inline-flex"
               >
                 Påmeldinger
               </Button>
@@ -272,7 +272,7 @@ export default function TeacherDashboard() {
               </Button>
               <Button
                 onClick={() => navigate(ROUTES.TEACHER.COURSES_CREATE)}
-                variant="default"
+                variant="outline"
                 size="sm"
                 className="rounded-full"
               >

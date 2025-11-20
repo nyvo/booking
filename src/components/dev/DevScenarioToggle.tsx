@@ -67,7 +67,7 @@ export function DevScenarioToggle() {
   const currentScenario = scenarios.find((s) => s.value === scenario);
 
   return (
-    <div className="fixed bottom-4 left-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button
@@ -81,7 +81,7 @@ export function DevScenarioToggle() {
             </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuContent align="end" className="w-64">
           <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
             DEV: Velg scenario for testing
           </DropdownMenuLabel>
